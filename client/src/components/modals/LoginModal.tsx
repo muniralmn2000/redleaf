@@ -19,16 +19,42 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegistration }: 
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
-      return await apiRequest("POST", "/api/login", data);
+      // Check if admin credentials
+      if ((data.email === 'munir@gmail.com' && data.password === '12341234') ||
+          (data.email === 'admin@gmail.com' && data.password === 'adminpass123')) {
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) throw new Error('Admin login failed');
+        const result = await response.json();
+        return { ...result, isAdmin: true };
+      } else {
+        return await apiRequest("POST", "/api/login", data);
+      }
     },
     onSuccess: async (response) => {
-      const result = await response.json();
-      toast({
-        title: "Login successful!",
-        description: `Welcome back, ${result.user.fullName}!`,
-      });
-      onClose();
-      setFormData({ email: "", password: "", rememberMe: false });
+      if (response.isAdmin) {
+        localStorage.setItem('adminAuthenticated', 'true');
+        localStorage.setItem('adminEmail', formData.email);
+        toast({
+          title: "Admin Access Granted!",
+          description: "You can now edit content directly on the website.",
+        });
+        onClose();
+        setFormData({ email: "", password: "", rememberMe: false });
+        // Trigger page refresh to show admin controls
+        window.location.reload();
+      } else {
+        const result = await response.json();
+        toast({
+          title: "Login successful!",
+          description: `Welcome back, ${result.user.fullName}!`,
+        });
+        onClose();
+        setFormData({ email: "", password: "", rememberMe: false });
+      }
     },
     onError: () => {
       toast({
