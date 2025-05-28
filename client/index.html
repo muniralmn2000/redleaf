@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="description" content="EduSphere - Transform your learning journey with our modern education platform. Access quality courses, connect with expert instructors, and unlock your potential." />
+    <meta name="keywords" content="education, online learning, courses, e-learning, students, teachers, certification" />
+    <meta name="author" content="EduSphere Education Platform" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="EduSphere - Modern Learning Platform" />
+    <meta property="og:description" content="Join thousands of students and educators in our innovative online learning platform. Access quality education and unlock your potential." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://edusphere.com" />
+    <meta property="og:image" content="/og-image.jpg" />
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EduSphere - Modern Learning Platform" />
+    <meta name="twitter:description" content="Transform your learning journey with expert-led courses and cutting-edge technology." />
+    <meta name="twitter:image" content="/og-image.jpg" />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+    
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <title>EduSphere - Transform Your Learning Journey</title>
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#6C63FF" />
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOrganization",
+      "name": "EduSphere",
+      "description": "Modern online learning platform offering quality education and expert instruction",
+      "url": "https://edusphere.com",
+      "logo": "https://edusphere.com/logo.png",
+      "sameAs": [
+        "https://facebook.com/edusphere",
+        "https://twitter.com/edusphere",
+        "https://linkedin.com/company/edusphere"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+1-555-123-4567",
+        "contactType": "customer service",
+        "email": "support@edusphere.com"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "123 Education Street",
+        "addressLocality": "Learning City",
+        "addressRegion": "LC",
+        "postalCode": "12345",
+        "addressCountry": "US"
+      }
+    }
+    </script>
+    
+    <!-- Security headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+  </head>
+  <body class="font-poppins">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    
+    <!-- Performance monitoring (placeholder for analytics) -->
+    <script>
+      // Performance monitoring
+      window.addEventListener('load', function() {
+        if ('performance' in window) {
+          const perfData = performance.getEntriesByType('navigation')[0];
+          console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart);
+        }
+      });
+      
+      // Service worker registration for PWA capabilities
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('SW registered: ', registration);
+            })
+            .catch(function(registrationError) {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

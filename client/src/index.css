@@ -1,0 +1,285 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --background: 0 0% 100%; /* #FFFFFF */
+  --foreground: 213 27% 20%; /* #2D3748 (dark) */
+  --muted: 0 0% 96%; /* #F5F5F5 */
+  --muted-foreground: 0 0% 45%; /* #737373 */
+  --popover: 0 0% 100%; /* #FFFFFF */
+  --popover-foreground: 213 27% 20%; /* #2D3748 */
+  --card: 0 0% 100%; /* #FFFFFF */
+  --card-foreground: 213 27% 20%; /* #2D3748 */
+  --border: 0 0% 90%; /* #E5E5E5 */
+  --input: 0 0% 90%; /* #E5E5E5 */
+  --primary: 249 58% 70%; /* #6C63FF (purple) */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 211 68% 63%; /* #4A90E2 (blue) */
+  --secondary-foreground: 0 0% 100%; /* #FFFFFF */
+  --accent: 351 91% 70%; /* #FF6B6B (red/pink) */
+  --accent-foreground: 0 0% 100%; /* #FFFFFF */
+  --destructive: 0 84% 60%; /* #F56565 */
+  --destructive-foreground: 0 0% 98%; /* #FAFAFA */
+  --ring: 249 58% 70%; /* #6C63FF */
+  --radius: 0.75rem;
+  
+  /* Custom EduSphere variables */
+  --primary-purple: 249 58% 70%; /* #6C63FF */
+  --secondary-blue: 211 68% 63%; /* #4A90E2 */
+  --accent-red: 351 91% 70%; /* #FF6B6B */
+  --dark-gray: 213 27% 20%; /* #2D3748 */
+  --light-gray: 200 17% 98%; /* #F7FAFC */
+}
+
+.dark {
+  --background: 213 27% 12%; /* #1A202C */
+  --foreground: 0 0% 98%; /* #FAFAFA */
+  --muted: 213 27% 16%; /* #2D3748 */
+  --muted-foreground: 0 0% 64%; /* #A0AEC0 */
+  --popover: 213 27% 12%; /* #1A202C */
+  --popover-foreground: 0 0% 98%; /* #FAFAFA */
+  --card: 213 27% 12%; /* #1A202C */
+  --card-foreground: 0 0% 98%; /* #FAFAFA */
+  --border: 213 27% 16%; /* #2D3748 */
+  --input: 213 27% 16%; /* #2D3748 */
+  --primary: 249 58% 70%; /* #6C63FF */
+  --primary-foreground: 0 0% 100%; /* #FFFFFF */
+  --secondary: 211 68% 63%; /* #4A90E2 */
+  --secondary-foreground: 0 0% 100%; /* #FFFFFF */
+  --accent: 351 91% 70%; /* #FF6B6B */
+  --accent-foreground: 0 0% 100%; /* #FFFFFF */
+  --destructive: 0 62% 31%; /* #991B1B */
+  --destructive-foreground: 0 0% 98%; /* #FAFAFA */
+  --ring: 249 58% 70%; /* #6C63FF */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+}
+
+@layer utilities {
+  /* EduSphere custom gradient backgrounds */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+  }
+  
+  .bg-gradient-secondary {
+    background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--accent)) 100%);
+  }
+  
+  .bg-gradient-accent {
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
+  }
+
+  /* Custom text gradients for EduSphere design */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Custom color utilities for EduSphere */
+  .text-primary {
+    color: hsl(var(--primary));
+  }
+  
+  .text-secondary {
+    color: hsl(var(--secondary));
+  }
+  
+  .text-accent {
+    color: hsl(var(--accent));
+  }
+  
+  .text-dark {
+    color: hsl(var(--dark-gray));
+  }
+
+  .bg-primary {
+    background-color: hsl(var(--primary));
+  }
+  
+  .bg-secondary {
+    background-color: hsl(var(--secondary));
+  }
+  
+  .bg-accent {
+    background-color: hsl(var(--accent));
+  }
+  
+  .bg-dark {
+    background-color: hsl(var(--dark-gray));
+  }
+
+  /* Custom hover effects */
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Custom animations */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom scrollbar for better UX */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--secondary));
+  }
+
+  /* Focus styles for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  /* Button styles consistent with design */
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-secondary text-white font-semibold py-3 px-6 rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 focus-ring;
+  }
+  
+  .btn-secondary {
+    @apply border-2 border-primary text-primary font-semibold py-3 px-6 rounded-full hover:bg-primary/5 transition-all duration-300 focus-ring;
+  }
+
+  /* Card styles for consistent design */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-2;
+  }
+
+  /* Form input styles */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all duration-300;
+  }
+}
+
+/* Font Awesome icons override for consistent styling */
+.fas, .fab {
+  font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands';
+}
+
+/* Override default font weight for better visibility */
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Ensure proper contrast ratios */
+.text-white {
+  color: #ffffff;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+/* Custom backdrop blur for modals */
+.backdrop-blur-custom {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Loading spinner animation */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive text sizes for better mobile experience */
+@media (max-width: 768px) {
+  .responsive-text {
+    font-size: clamp(1rem, 4vw, 1.25rem);
+  }
+  
+  .responsive-heading {
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --primary: 245 58% 51%; /* Darker primary for better contrast */
+    --secondary: 207 68% 42%; /* Darker secondary for better contrast */
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}

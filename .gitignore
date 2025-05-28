@@ -1,10 +1,6 @@
-# Environment variables
-.env
- 
-# Node.js
-node_modules/
-npm-debug.log
-Yarn.lock
-package-lock.json
-uploads/
-data.json 
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
