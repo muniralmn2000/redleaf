@@ -1,3 +1,5 @@
+import AdminEditableContent from "./AdminEditableContent";
+
 export default function AboutSection() {
   const stats = [
     { value: "4.8/5", label: "Average Rating", color: "text-primary" },
@@ -30,18 +32,34 @@ export default function AboutSection() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Content */}
           <div className="space-y-8">
-            <div className="space-y-6">
-              <h2 className="text-4xl lg:text-5xl font-bold">
-                <span className="text-dark">About </span>
-                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">EduSphere</span>
-              </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Founded in 2020, EduSphere has been at the forefront of digital education, empowering learners worldwide with innovative online courses and cutting-edge learning technologies.
-              </p>
-              <p className="text-gray-600 leading-relaxed">
-                Our mission is to democratize education by making high-quality learning accessible to everyone, regardless of location or background. We believe that education is the key to unlocking human potential and creating a better future for all.
-              </p>
-            </div>
+            <AdminEditableContent section="about">
+              {(content, isEditing, startEdit) => (
+                <div className="space-y-6">
+                  {isEditing ? (
+                    <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                      <p className="text-blue-800 font-medium">✏️ Currently editing About section</p>
+                    </div>
+                  ) : (
+                    <div 
+                      className="cursor-pointer hover:bg-blue-50 p-4 rounded-lg transition-colors"
+                      onClick={startEdit}
+                      title="Click to edit this section"
+                    >
+                      <h2 className="text-4xl lg:text-5xl font-bold">
+                        <span className="text-dark">About </span>
+                        <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">EduSphere</span>
+                      </h2>
+                      <p className="text-xl text-gray-600 leading-relaxed mt-6">
+                        {content?.title || "About EduSphere"}
+                      </p>
+                      <p className="text-gray-600 leading-relaxed mt-4">
+                        {content?.description || "Founded in 2020, EduSphere has been at the forefront of digital education, empowering learners worldwide with innovative online courses and cutting-edge learning technologies."}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </AdminEditableContent>
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-8">

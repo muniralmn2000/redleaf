@@ -1,3 +1,5 @@
+import AdminEditableContent from "./AdminEditableContent";
+
 export default function FeaturesSection() {
   const features = [
     {
@@ -42,15 +44,32 @@ export default function FeaturesSection() {
     <section id="features" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold">
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Why Choose</span>
-            <span className="text-dark"> EduSphere?</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Our platform combines cutting-edge technology with proven educational methodologies to deliver exceptional learning experiences.
-          </p>
-        </div>
+        <AdminEditableContent section="features">
+          {(content, isEditing, startEdit) => (
+            <div className="text-center space-y-4 mb-16">
+              {isEditing ? (
+                <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                  <p className="text-blue-800 font-medium">✏️ Currently editing Features section</p>
+                </div>
+              ) : (
+                <div 
+                  className="cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                  onClick={startEdit}
+                  title="Click to edit this section"
+                >
+                  <h2 className="text-4xl lg:text-5xl font-bold">
+                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      {content?.title || "Why Choose EduSphere?"}
+                    </span>
+                  </h2>
+                  <p className="text-xl text-gray-600 max-w-3xl mx-auto mt-4">
+                    {content?.description || "Our platform combines cutting-edge technology with proven educational methodologies to deliver exceptional learning experiences."}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </AdminEditableContent>
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">

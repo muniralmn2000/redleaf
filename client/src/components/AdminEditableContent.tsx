@@ -26,7 +26,7 @@ interface PageContent {
 }
 
 interface AdminEditableContentProps {
-  section: 'home' | 'about' | 'contact';
+  section: 'home' | 'about' | 'contact' | 'features' | 'testimonials';
   children: (content: any, isEditing: boolean, startEdit: () => void) => React.ReactNode;
 }
 
@@ -147,14 +147,48 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
   };
 
   // Get current content or default
-  const currentContent = pageContent ? pageContent[section] : {
-    title: section === 'home' ? 'Transform Your Learning Journey' : 
-          section === 'about' ? 'About EduSphere' : 'Get In Touch',
-    description: section === 'home' ? 'Join thousands of students and educators in our modern learning platform.' :
-                section === 'about' ? 'Founded in 2020, EduSphere has been at the forefront of digital education.' :
-                'Have questions about our courses or need assistance?',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+  const getDefaultContent = (section: string) => {
+    switch(section) {
+      case 'home':
+        return {
+          title: 'Transform Your Learning Journey',
+          description: 'Join thousands of students and educators in our modern learning platform.',
+          image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        };
+      case 'about':
+        return {
+          title: 'About EduSphere',
+          description: 'Founded in 2020, EduSphere has been at the forefront of digital education.',
+          image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        };
+      case 'contact':
+        return {
+          title: 'Get In Touch',
+          description: 'Have questions about our courses or need assistance?',
+          image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        };
+      case 'features':
+        return {
+          title: 'Why Choose EduSphere?',
+          description: 'Discover the features that make our platform the preferred choice for modern learners.',
+          image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        };
+      case 'testimonials':
+        return {
+          title: 'What Our Students Say',
+          description: 'Hear from thousands of students who have transformed their careers through our platform.',
+          image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        };
+      default:
+        return {
+          title: 'Editable Content',
+          description: 'This content can be edited by admin.',
+          image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
+        };
+    }
   };
+
+  const currentContent = pageContent && pageContent[section] ? pageContent[section] : getDefaultContent(section);
 
   if (!isAdmin) {
     return <>{children(currentContent, false, () => {})}</>;

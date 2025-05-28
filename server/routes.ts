@@ -459,6 +459,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: "Get In Touch",
         description: "Have questions about our courses or need assistance? We're here to help you on your learning journey.",
         image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600"
+      },
+      features: {
+        title: "Why Choose EduSphere?",
+        description: "Discover the features that make our platform the preferred choice for modern learners.",
+        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
+      },
+      testimonials: {
+        title: "What Our Students Say",
+        description: "Hear from thousands of students who have transformed their careers through our platform.",
+        image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
       }
     };
     fs.writeFileSync(contentJsonPath, JSON.stringify(defaultContent, null, 2));
@@ -479,7 +489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { page, title, description, image } = req.body;
       
-      if (!page || !['home', 'about', 'contact'].includes(page)) {
+      if (!page || !['home', 'about', 'contact', 'features', 'testimonials'].includes(page)) {
         return res.status(400).json({ message: 'Invalid page specified' });
       }
 
