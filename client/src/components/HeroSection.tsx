@@ -27,11 +27,11 @@ export default function HeroSection({ onOpenRegistration }: HeroSectionProps) {
                 <div className="space-y-6">
                   <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
                     <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      {content.title}
+                      {editableText('title', 'EduSphere', 'inline-block')}
                     </span>
                   </h1>
                   <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                    {content.description}
+                    {editableText('description', 'Unlock your potential with our comprehensive online learning platform. Join thousands of students mastering new skills through expert-led courses, interactive projects, and personalized learning paths.', 'block')}
                   </p>
                 </div>
 

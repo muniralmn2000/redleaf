@@ -22,7 +22,7 @@ export default function CoursesSection() {
 
   return (
     <AdminEditableContent section="courses">
-      {(content, isEditing, startEdit) => (
+      {(content, isEditing, startEdit, editableText, editableImage) => (
         <section id="courses" className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             {/* Section Header */}
