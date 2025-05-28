@@ -1,3 +1,5 @@
+import AdminEditableContent from "./AdminEditableContent";
+
 export default function TestimonialsSection() {
   const testimonials = [
     {
@@ -27,15 +29,31 @@ export default function TestimonialsSection() {
     <section id="testimonials" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold">
-            <span className="text-dark">What Our </span>
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Students Say</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Real feedback from our learning community about their transformative educational experiences.
-          </p>
-        </div>
+        <AdminEditableContent section="testimonials">
+          {(content, isEditing, startEdit) => (
+            <div className="text-center space-y-4 mb-16">
+              {isEditing ? (
+                <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                  <p className="text-blue-800 font-medium">✏️ Currently editing Testimonials section</p>
+                </div>
+              ) : (
+                <div 
+                  className="cursor-pointer hover:bg-blue-50 p-2 rounded-lg transition-colors"
+                  onClick={startEdit}
+                  title="Click to edit this section"
+                >
+                  <h2 className="text-4xl lg:text-5xl font-bold">
+                    <span className="text-dark">What Our </span>
+                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Students Say</span>
+                  </h2>
+                  <p className="text-xl text-gray-600 max-w-3xl mx-auto mt-4">
+                    {content?.description || "Real feedback from our learning community about their transformative educational experiences."}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </AdminEditableContent>
 
         {/* Testimonials Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
