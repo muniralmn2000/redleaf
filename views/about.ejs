@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= content.about.title %></title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/courses">Courses</a>
+        <% if (admin) { %>
+            <a href="/admin/logout" style="float:right;">Logout</a>
+        <% } else { %>
+            <a href="/admin/login" style="float:right;">Admin</a>
+        <% } %>
+    </nav>
+    <section class="about">
+        <h1>
+            <span class="editable" data-field="aboutTitle"><%= content.about.title %></span>
+            <% if (admin) { %>
+                <button class="edit-btn" onclick="editField('aboutTitle')">Edit</button>
+            <% } %>
+        </h1>
+        <p>
+            <span class="editable" data-field="aboutText"><%= content.about.description %></span>
+            <% if (admin) { %>
+                <button class="edit-btn" onclick="editField('aboutText')">Edit</button>
+            <% } %>
+        </p>
+        <img src="<%= content.about.image %>" alt="About Image" style="max-width:300px;" />
+    </section>
+    <% if (admin) { %>
+    <script>
+        function editField(field) {
+            var span = document.querySelector('.editable[data-field="' + field + '"]');
+            var value = span.textContent;
+            var input = document.createElement(field === 'aboutText' ? 'textarea' : 'input');
+            input.value = value;
+            input.style.width = '80%';
+            span.parentNode.insertBefore(input, span);
+            span.style.display = 'none';
+            var saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.className = 'save-btn';
+            saveBtn.onclick = function() {
+                fetch('/admin/update-text', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ page: 'about', field: field, value: input.value })
+                }).then(r=>r.json()).then(data=>{
+                    if(data.success) {
+                        span.textContent = input.value;
+                        input.remove();
+                        saveBtn.remove();
+                        cancelBtn.remove();
+                        span.style.display = '';
+                    }
+                });
+            };
+            var cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'cancel-btn';
+            cancelBtn.onclick = function() {
+                input.remove();
+                saveBtn.remove();
+                cancelBtn.remove();
+                span.style.display = '';
+            };
+            input.parentNode.insertBefore(saveBtn, input.nextSibling);
+            input.parentNode.insertBefore(cancelBtn, saveBtn.nextSibling);
+        }
+    </script>
+    <% } %>
+</body>
+</html> 

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>School Portal</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .edit-btn, .save-btn, .cancel-btn, .upload-btn, .delete-btn { margin: 0 5px; }
+        .admin-controls { margin-top: 10px; }
+        .img-thumb { width: 120px; height: 80px; object-fit: cover; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <% if (admin) { %>
+            <a href="/admin/logout" style="float:right;">Logout</a>
+        <% } else { %>
+            <a href="/admin/login" style="float:right;">Admin</a>
+        <% } %>
+    </nav>
+    <header class="hero">
+        <h1 id="heroTitle">
+            <span class="editable" data-field="heroTitle"><%= content.heroTitle %></span>
+            <% if (admin) { %>
+                <button class="edit-btn" onclick="editField('heroTitle')">Edit</button>
+            <% } %>
+        </h1>
+        <p id="heroSubtitle">
+            <span class="editable" data-field="heroSubtitle"><%= content.heroSubtitle %></span>
+            <% if (admin) { %>
+                <button class="edit-btn" onclick="editField('heroSubtitle')">Edit</button>
+            <% } %>
+        </p>
+    </header>
+    <section class="about">
+        <h2>About Us</h2>
+        <p id="aboutText">
+            <span class="editable" data-field="aboutText"><%= content.aboutText %></span>
+            <% if (admin) { %>
+                <button class="edit-btn" onclick="editField('aboutText')">Edit</button>
+            <% } %>
+        </p>
+    </section>
+    <section class="gallery">
+        <h2>Gallery</h2>
+        <div class="images">
+            <% (content.images || []).forEach(function(img, idx) { %>
+                <div class="img-card">
+                    <img src="<%= img.url %>" class="img-thumb" />
+                    <div>
+                        <span class="img-caption" data-idx="<%= idx %>"><%= img.caption %></span>
+                        <% if (admin) { %>
+                            <input type="text" class="caption-input" data-idx="<%= idx %>" value="<%= img.caption %>" style="display:none;width:100px;">
+                            <button class="edit-btn" onclick="editCaption('<%= idx %>')">Edit</button>
+                            <button class="save-btn" onclick="saveCaption('<%= idx %>')" style="display:none;">Save</button>
+                            <button class="cancel-btn" onclick="cancelCaption('<%= idx %>')" style="display:none;">Cancel</button>
+                            <button class="delete-btn" onclick="deleteImage('<%= idx %>')">Delete</button>
+                        <% } %>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        <% if (admin) { %>
+            <form id="imgUploadForm" enctype="multipart/form-data" class="admin-controls">
+                <input type="file" name="image" accept="image/*" required>
+                <input type="text" name="caption" placeholder="Caption">
+                <button type="submit" class="upload-btn">Upload Image</button>
+                <span id="imgStatus"></span>
+            </form>
+        <% } %>
+    </section>
+    <footer>
+        &copy; 2024 School Portal
+    </footer>
+    <% if (admin) { %>
+    <script>
+        // Inline text editing
+        function editField(field) {
+            var span = document.querySelector('.editable[data-field="' + field + '"]');
+            var value = span.textContent;
+            var input = document.createElement(field === 'aboutText' ? 'textarea' : 'input');
+            input.value = value;
+            input.style.width = '80%';
+            span.parentNode.insertBefore(input, span);
+            span.style.display = 'none';
+            var saveBtn = document.createElement('button');
+            saveBtn.textContent = 'Save';
+            saveBtn.className = 'save-btn';
+            saveBtn.onclick = function() {
+                fetch('/admin/update-text', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ field: field, value: input.value })
+                }).then(r=>r.json()).then(data=>{
+                    if(data.success) {
+                        span.textContent = input.value;
+                        input.remove();
+                        saveBtn.remove();
+                        cancelBtn.remove();
+                        span.style.display = '';
+                    }
+                });
+            };
+            var cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'cancel-btn';
+            cancelBtn.onclick = function() {
+                input.remove();
+                saveBtn.remove();
+                cancelBtn.remove();
+                span.style.display = '';
+            };
+            input.parentNode.insertBefore(saveBtn, input.nextSibling);
+            input.parentNode.insertBefore(cancelBtn, saveBtn.nextSibling);
+        }
+
+        // Image caption editing
+        function editCaption(idx) {
+            document.querySelector('.img-caption[data-idx="'+idx+'"]').style.display = 'none';
+            document.querySelector('.caption-input[data-idx="'+idx+'"]').style.display = '';
+            document.querySelector('.save-btn[onclick="saveCaption('+idx+')"]')?.style.display = '';
+            document.querySelector('.cancel-btn[onclick="cancelCaption('+idx+')"]')?.style.display = '';
+        }
+        function saveCaption(idx) {
+            var input = document.querySelector('.caption-input[data-idx="'+idx+'"]').value;
+            fetch('/admin/edit-image', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ index: idx, caption: input })
+            }).then(r=>r.json()).then(data=>{
+                if(data.success) {
+                    document.querySelector('.img-caption[data-idx="'+idx+'"]').textContent = input;
+                    cancelCaption(idx);
+                }
+            });
+        }
+        function cancelCaption(idx) {
+            document.querySelector('.img-caption[data-idx="'+idx+'"]').style.display = '';
+            document.querySelector('.caption-input[data-idx="'+idx+'"]').style.display = 'none';
+            document.querySelector('.save-btn[onclick="saveCaption('+idx+')"]')?.style.display = 'none';
+            document.querySelector('.cancel-btn[onclick="cancelCaption('+idx+')"]')?.style.display = 'none';
+        }
+        function deleteImage(idx) {
+            if(!confirm('Delete this image?')) return;
+            fetch('/admin/delete-image', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ index: idx })
+            }).then(r=>r.json()).then(data=>{
+                if(data.success) location.reload();
+            });
+        }
+        // Image upload
+        document.getElementById('imgUploadForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            fetch('/admin/upload-image', {
+                method: 'POST',
+                body: formData
+            }).then(r=>r.json()).then(data=>{
+                document.getElementById('imgStatus').textContent = data.success ? "Uploaded!" : (data.error || "Error");
+                if(data.success) location.reload();
+            });
+        });
+    </script>
+    <% } %>
+</body>
+</html> 

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
+        .container { width: 300px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        label, input { display: block; margin-bottom: 10px; }
+        input[type="email"], input[type="password"] { width: calc(100% - 10px); padding: 5px; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #message { margin-top: 15px; font-weight: bold; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Admin Login</h2>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button id="loginButton">Login</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        console.log("Admin page script loaded."); // DEBUG_LOG_1
+
+        document.getElementById('loginButton').addEventListener('click', async function() {
+            console.log("Login button clicked!"); // DEBUG_LOG_2
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = ''; // Clear previous messages
+            messageDiv.className = '';
+
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    messageDiv.textContent = 'Login successful! Token: ' + data.token;
+                    messageDiv.className = 'success';
+                    // For simplicity, storing token in localStorage.
+                    // In a real app, consider more secure storage if needed (e.g., HttpOnly cookies managed by backend).
+                    localStorage.setItem('adminToken', data.token);
+                    // TODO: Redirect to an admin dashboard or enable editing features.
+                    // For now, we'll just show the token.
+                } else {
+                    messageDiv.textContent = data.message || 'Login failed. Please try again.';
+                    messageDiv.className = 'error';
+                    localStorage.removeItem('adminToken');
+                }
+            } catch (error) {
+                console.error('Login API call failed:', error);
+                messageDiv.textContent = 'An error occurred. Please check the console and try again.';
+                messageDiv.className = 'error';
+                localStorage.removeItem('adminToken');
+            }
+        });
+    </script>
+</body>
+</html> 

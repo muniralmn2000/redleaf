@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/logout" style="float:right;">Logout</a>
+  </nav>
+  <h1>Admin Dashboard</h1>
+  <form action="/admin/update" method="POST" enctype="multipart/form-data">
+    <h2>Home Page</h2>
+    <label>Title: <input type="text" name="homeTitle" value="<%= content.home.title %>" /></label><br>
+    <label>Description:<br><textarea name="homeDescription"><%= content.home.description %></textarea></label><br>
+    <label>Image: <input type="file" name="homeImage" /></label><br>
+    <img src="<%= content.home.image %>" alt="Home Image" style="max-width:200px;" /><br>
+    <hr>
+    <h2>About Page</h2>
+    <label>Title: <input type="text" name="aboutTitle" value="<%= content.about.title %>" /></label><br>
+    <label>Description:<br><textarea name="aboutDescription"><%= content.about.description %></textarea></label><br>
+    <label>Image: <input type="file" name="aboutImage" /></label><br>
+    <img src="<%= content.about.image %>" alt="About Image" style="max-width:200px;" /><br>
+    <hr>
+    <h2>Contact Page</h2>
+    <label>Title: <input type="text" name="contactTitle" value="<%= content.contact.title %>" /></label><br>
+    <label>Description:<br><textarea name="contactDescription"><%= content.contact.description %></textarea></label><br>
+    <label>Image: <input type="file" name="contactImage" /></label><br>
+    <img src="<%= content.contact.image %>" alt="Contact Image" style="max-width:200px;" /><br>
+    <hr>
+    <button type="submit">Save</button>
+  </form>
+</body>
+</html> 

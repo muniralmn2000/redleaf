@@ -1,0 +1,17 @@
+{
+  "home": {
+    "title": "Welcome!",
+    "description": "This is the homepage.",
+    "image": "/uploads/home.jpg"
+  },
+  "about": {
+    "title": "About Us",
+    "description": "Who we are",
+    "image": "/uploads/about.jpg"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Get in touch",
+    "image": "/uploads/contact.jpg"
+  }
+} 
