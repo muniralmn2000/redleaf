@@ -49,37 +49,10 @@ export default function Navbar({ onOpenLogin, onOpenRegistration, onOpenAdmin }:
             </Link>
             <Link href="/contact">
               <span className={`text-dark hover:text-primary transition-colors duration-300 font-medium relative group cursor-pointer ${location === '/contact' ? 'text-primary' : ''}`}>
-              Home
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
-            </button>
-            <button 
-              onClick={() => scrollToSection('features')}
-              className="text-dark hover:text-primary transition-colors duration-300 font-medium relative group"
-            >
-              Features
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
-            </button>
-            <button 
-              onClick={() => scrollToSection('courses')}
-              className="text-dark hover:text-primary transition-colors duration-300 font-medium relative group"
-            >
-              Courses
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
-            </button>
-            <button 
-              onClick={() => scrollToSection('about')}
-              className="text-dark hover:text-primary transition-colors duration-300 font-medium relative group"
-            >
-              About
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
-            </button>
-            <button 
-              onClick={() => scrollToSection('contact')}
-              className="text-dark hover:text-primary transition-colors duration-300 font-medium relative group"
-            >
-              Contact
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
-            </button>
+                Contact
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </span>
+            </Link>
           </div>
 
           {/* Auth Buttons */}
@@ -118,36 +91,26 @@ export default function Navbar({ onOpenLogin, onOpenRegistration, onOpenAdmin }:
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 px-6 py-4">
           <div className="space-y-4">
-            <button 
-              onClick={() => scrollToSection('home')}
-              className="block text-dark hover:text-primary transition-colors duration-300 font-medium"
-            >
-              Home
-            </button>
-            <button 
-              onClick={() => scrollToSection('features')}
-              className="block text-dark hover:text-primary transition-colors duration-300 font-medium"
-            >
-              Features
-            </button>
-            <button 
-              onClick={() => scrollToSection('courses')}
-              className="block text-dark hover:text-primary transition-colors duration-300 font-medium"
-            >
-              Courses
-            </button>
-            <button 
-              onClick={() => scrollToSection('about')}
-              className="block text-dark hover:text-primary transition-colors duration-300 font-medium"
-            >
-              About
-            </button>
-            <button 
-              onClick={() => scrollToSection('contact')}
-              className="block text-dark hover:text-primary transition-colors duration-300 font-medium"
-            >
-              Contact
-            </button>
+            <Link href="/">
+              <span className={`block text-dark hover:text-primary transition-colors duration-300 font-medium cursor-pointer ${location === '/' ? 'text-primary' : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                Home
+              </span>
+            </Link>
+            <Link href="/features">
+              <span className={`block text-dark hover:text-primary transition-colors duration-300 font-medium cursor-pointer ${location === '/features' ? 'text-primary' : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                Features
+              </span>
+            </Link>
+            <Link href="/about">
+              <span className={`block text-dark hover:text-primary transition-colors duration-300 font-medium cursor-pointer ${location === '/about' ? 'text-primary' : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                About
+              </span>
+            </Link>
+            <Link href="/contact">
+              <span className={`block text-dark hover:text-primary transition-colors duration-300 font-medium cursor-pointer ${location === '/contact' ? 'text-primary' : ''}`} onClick={() => setIsMobileMenuOpen(false)}>
+                Contact
+              </span>
+            </Link>
             <div className="border-t border-gray-100 pt-4 space-y-3">
               <button 
                 onClick={onOpenLogin}
