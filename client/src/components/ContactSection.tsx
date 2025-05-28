@@ -54,24 +54,18 @@ export default function ContactSection() {
 
   return (
     <AdminEditableContent section="contact">
-      {(content, isEditing, startEdit) => (
+      {(content, isEditing, startEdit, editableText, editableImage) => (
         <section id="contact" className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center space-y-4 mb-16">
-              <h2 
-                className={`text-4xl lg:text-5xl font-bold ${isEditing ? 'cursor-pointer hover:bg-yellow-100 p-2 rounded' : ''}`}
-                onClick={isEditing ? startEdit : undefined}
-              >
+              <h2 className="text-4xl lg:text-5xl font-bold">
                 <span className="text-dark">
-                  {content?.mainTitle || 'Let\'s Connect'}
+                  {editableText('mainTitle', 'Let\'s Connect', 'text-4xl lg:text-5xl font-bold')}
                 </span>
               </h2>
-              <p 
-                className={`text-xl text-gray-600 max-w-3xl mx-auto ${isEditing ? 'cursor-pointer hover:bg-yellow-100 p-2 rounded' : ''}`}
-                onClick={isEditing ? startEdit : undefined}
-              >
-                {content?.description || 'Ready to start your learning journey or have questions about our courses? We\'d love to hear from you. Send us a message and we\'ll respond as soon as possible.'}
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                {editableText('description', 'Ready to start your learning journey or have questions about our courses? We\'d love to hear from you. Send us a message and we\'ll respond as soon as possible.', 'text-xl text-gray-600')}
               </p>
             </div>
 
