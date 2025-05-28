@@ -136,18 +136,19 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
 
     return (
       <span 
-        className={`${className} cursor-pointer hover:bg-yellow-100 hover:shadow-lg hover:scale-105 transition-all duration-300 relative group border-2 border-transparent hover:border-yellow-300 rounded-md px-1`}
+        className={`${className} cursor-pointer hover:bg-yellow-200 hover:shadow-xl transition-all duration-300 relative group border-2 border-dashed border-transparent hover:border-blue-400 rounded-lg px-2 py-1 bg-opacity-20 hover:bg-blue-50`}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           handleFieldEdit(field, value);
         }}
-        title="Click to edit this text"
+        title="🖊️ Admin: Click to edit this text"
       >
         {value}
-        <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-          ✏️ Click to edit
-        </span>
+        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+          🖊️ EDIT
+        </div>
+        <div className="absolute inset-0 border-2 border-blue-300 rounded-lg opacity-0 group-hover:opacity-50 transition-opacity duration-300 animate-pulse"></div>
       </span>
     );
   };
@@ -161,14 +162,14 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
     }
 
     return (
-      <div className="relative group">
+      <div className="relative group cursor-pointer">
         <img 
           src={src} 
           alt={alt} 
-          className={`${className} cursor-pointer hover:opacity-70 transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 border-transparent hover:border-yellow-300 rounded-lg`} 
+          className={`${className} transition-all duration-300 hover:scale-105 hover:shadow-2xl border-4 border-dashed border-transparent hover:border-blue-400 rounded-lg hover:brightness-75`} 
         />
         <div 
-          className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer rounded-lg"
+          className="absolute inset-0 bg-blue-600 bg-opacity-80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer rounded-lg"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -183,11 +184,15 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
             };
             input.click();
           }}
+          title="🖼️ Admin: Click to upload new image"
         >
-          <div className="text-center text-white">
-            <div className="text-2xl mb-2">📷</div>
-            <div className="text-sm font-semibold">Click to change image</div>
+          <div className="text-center text-white animate-pulse">
+            <div className="text-4xl mb-2">🖼️</div>
+            <div className="text-lg font-bold bg-blue-700 px-4 py-2 rounded-full">CHANGE IMAGE</div>
           </div>
+        </div>
+        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+          🖼️ UPLOAD NEW IMAGE
         </div>
       </div>
     );
