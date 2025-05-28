@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useLocation } from "wouter";
 
 interface NavbarProps {
   onOpenLogin: () => void;
@@ -9,13 +10,7 @@ interface NavbarProps {
 export default function Navbar({ onOpenLogin, onOpenRegistration, onOpenAdmin }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setIsMobileMenuOpen(false);
-    }
-  };
+  const [location] = useLocation();
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-white/98 backdrop-blur-sm shadow-lg z-50 transition-all duration-300">
@@ -34,10 +29,26 @@ export default function Navbar({ onOpenLogin, onOpenRegistration, onOpenAdmin }:
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-8">
-            <button 
-              onClick={() => scrollToSection('home')}
-              className="text-dark hover:text-primary transition-colors duration-300 font-medium relative group"
-            >
+            <Link href="/">
+              <span className={`text-dark hover:text-primary transition-colors duration-300 font-medium relative group cursor-pointer ${location === '/' ? 'text-primary' : ''}`}>
+                Home
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </span>
+            </Link>
+            <Link href="/features">
+              <span className={`text-dark hover:text-primary transition-colors duration-300 font-medium relative group cursor-pointer ${location === '/features' ? 'text-primary' : ''}`}>
+                Features
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </span>
+            </Link>
+            <Link href="/about">
+              <span className={`text-dark hover:text-primary transition-colors duration-300 font-medium relative group cursor-pointer ${location === '/about' ? 'text-primary' : ''}`}>
+                About
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              </span>
+            </Link>
+            <Link href="/contact">
+              <span className={`text-dark hover:text-primary transition-colors duration-300 font-medium relative group cursor-pointer ${location === '/contact' ? 'text-primary' : ''}`}>
               Home
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
             </button>
