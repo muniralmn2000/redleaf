@@ -1,0 +1,125 @@
+// ✅ Full Prompt for Replit AI (Admin Dashboard Inside Existing Site)
+
+/*
+==============================
+💡 PROJECT GOAL:
+You already built a full website using Node.js, Express, and EJS. Your website includes these pages:
+- Home ("/")
+- Contact ("/contact")
+- About Us ("/about")
+- Login ("/login")
+- Sign Up ("/signup")
+
+🟢 Now you want to add an admin dashboard at "/admin" — NOT in a new project, but inside this same existing site.
+
+==============================
+🔐 Admin Login Info:
+- Email: "munir@gmail.com"
+- Password: "12341234"
+- Use `express-session` to keep the admin logged in
+- After login, redirect to "/admin"
+
+==============================
+🛠 Admin Page (/admin):
+Create a page where the admin can:
+- View and edit the text content (title and description) for the Home, Contact, and About pages.
+- Upload a new image for each page.
+- See current text and images as a live preview.
+- Click a “Save” button to update everything.
+
+==============================
+📂 How to store content:
+Use a file named `content.json` to save the text and image paths, like this:
+```json
+{
+  "home": {
+    "title": "Welcome!",
+    "description": "This is the homepage.",
+    "image": "/uploads/home.jpg"
+  },
+  "about": {
+    "title": "About Us",
+    "description": "Who we are",
+    "image": "/uploads/about.jpg"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "description": "Get in touch",
+    "image": "/uploads/contact.jpg"
+  }
+}
+==============================
+🖼 Image Upload:
+
+Upload image files to a folder like /public/uploads
+
+Use multer middleware for handling file uploads
+
+==============================
+👨‍💻 Update server.js or index.js:
+
+Add routes for login, admin, and content updates
+
+Use middleware like:
+
+js
+نسخ
+تحرير
+const session = require('express-session');
+const multer = require('multer');
+const fs = require('fs');
+==============================
+📄 EJS Integration:
+In your Home, About, and Contact views, replace hardcoded text/image with dynamic content from content.json, like:
+
+ejs
+نسخ
+تحرير
+<h1><%= content.home.title %></h1>
+<p><%= content.home.description %></p>
+<img src="<%= content.home.image %>" />
+==============================
+📋 Summary of Tasks:
+
+Add login system using express-session
+
+Create /admin route + admin.ejs view
+
+Add form inputs to edit text/images for home, about, and contact
+
+Save all text data to content.json
+
+Save uploaded images to /public/uploads
+
+Show updated content in main pages
+
+⚠️ IMPORTANT:
+Do NOT create a new website or new files outside this project. Everything should be added inside the current working website.
+
+🎯 Final Result:
+The admin logs in → visits /admin → edits the content → changes appear live on the public site.
+
+*/
+
+yaml
+نسخ
+تحرير
+
+---
+
+### ✅ What You Get After Replit Runs This Prompt:
+
+- `/admin` page inside your website
+- Login system for only one admin user (`munir@gmail.com`)
+- Edit all texts and images on existing pages
+- Uploads saved to `/public/uploads`
+- Dynamic content from `content.json`
+
+---
+
+📌 Let me know if you want me to also:
+- Write the full backend/server code for this
+- Generate the actual `admin.ejs` page
+- Create a working Replit template
+
+I’m here to finish the whole system if you want — just say the word.

@@ -10,6 +10,7 @@ import RegistrationModal from "@/components/modals/RegistrationModal";
 import LoginModal from "@/components/modals/LoginModal";
 import AdminModal from "@/components/modals/AdminModal";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Home() {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);

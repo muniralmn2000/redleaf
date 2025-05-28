@@ -237,8 +237,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // Hardcoded admin credentials
-      if (email === 'admin@gmail.com' && password === 'adminpass123') {
+      // Support both admin accounts
+      if ((email === 'admin@gmail.com' && password === 'adminpass123') ||
+          (email === 'munir@gmail.com' && password === '12341234')) {
         res.json({ message: 'Admin authentication successful', admin: true });
       } else {
         res.status(401).json({ message: 'Invalid admin credentials' });
@@ -396,6 +397,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch statistics' });
+    }
+  });
+
+  // Image upload for content management
+  const contentUpload = multer({
+    storage: multer.diskStorage({
+      destination: (req, file, cb) => {
+        const contentUploadsDir = path.join(uploadsDir, 'content');
+        if (!fs.existsSync(contentUploadsDir)) {
+          fs.mkdirSync(contentUploadsDir, { recursive: true });
+        }
+        cb(null, contentUploadsDir);
+      },
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+      }
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'));
+      }
+    }
+  });
+
+  // Upload content image
+  app.post('/api/admin/upload-image', contentUpload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No image file provided' });
+      }
+      
+      const imageUrl = `/uploads/content/${req.file.filename}`;
+      res.json({ imageUrl });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to upload image' });
+    }
+  });
+
+  // Content.json management
+  const contentJsonPath = path.join(process.cwd(), 'content.json');
+  
+  // Initialize content.json if it doesn't exist
+  if (!fs.existsSync(contentJsonPath)) {
+    const defaultContent = {
+      home: {
+        title: "Transform Your Learning Journey",
+        description: "Join thousands of students and educators in our modern learning platform. Access quality education, connect with expert instructors, and unlock your potential.",
+        image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600"
+      },
+      about: {
+        title: "About EduSphere",
+        description: "Founded in 2020, EduSphere has been at the forefront of digital education, empowering learners worldwide with innovative online courses and cutting-edge learning technologies.",
+        image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600"
+      },
+      contact: {
+        title: "Get In Touch",
+        description: "Have questions about our courses or need assistance? We're here to help you on your learning journey.",
+        image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600"
+      }
+    };
+    fs.writeFileSync(contentJsonPath, JSON.stringify(defaultContent, null, 2));
+  }
+
+  // Get content.json data
+  app.get('/api/admin/page-content', async (req, res) => {
+    try {
+      const contentData = JSON.parse(fs.readFileSync(contentJsonPath, 'utf-8'));
+      res.json(contentData);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to load page content' });
+    }
+  });
+
+  // Update content.json data
+  app.put('/api/admin/page-content', async (req, res) => {
+    try {
+      const { page, title, description, image } = req.body;
+      
+      if (!page || !['home', 'about', 'contact'].includes(page)) {
+        return res.status(400).json({ message: 'Invalid page specified' });
+      }
+
+      const contentData = JSON.parse(fs.readFileSync(contentJsonPath, 'utf-8'));
+      
+      if (title !== undefined) contentData[page].title = title;
+      if (description !== undefined) contentData[page].description = description;
+      if (image !== undefined) contentData[page].image = image;
+
+      fs.writeFileSync(contentJsonPath, JSON.stringify(contentData, null, 2));
+      
+      res.json({ message: 'Content updated successfully', content: contentData[page] });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update content' });
     }
   });
 
