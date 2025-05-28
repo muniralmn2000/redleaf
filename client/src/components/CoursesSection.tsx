@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Course } from "@shared/schema";
+import AdminEditableContent from "./AdminEditableContent";
 
 export default function CoursesSection() {
   const { data: courses = [], isLoading } = useQuery<Course[]>({
@@ -20,18 +21,28 @@ export default function CoursesSection() {
   }
 
   return (
-    <section id="courses" className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold">
-            <span className="text-dark">Popular </span>
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Courses</span>
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Discover our most enrolled courses across various disciplines, designed to help you achieve your learning goals.
-          </p>
-        </div>
+    <AdminEditableContent section="courses">
+      {(content, isEditing, startEdit) => (
+        <section id="courses" className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            {/* Section Header */}
+            <div className="text-center space-y-4 mb-16">
+              <h2 
+                className={`text-4xl lg:text-5xl font-bold ${isEditing ? 'cursor-pointer hover:bg-yellow-100 p-2 rounded' : ''}`}
+                onClick={isEditing ? startEdit : undefined}
+              >
+                <span className="text-dark">Popular </span>
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {content?.title || 'Courses'}
+                </span>
+              </h2>
+              <p 
+                className={`text-xl text-gray-600 max-w-3xl mx-auto ${isEditing ? 'cursor-pointer hover:bg-yellow-100 p-2 rounded' : ''}`}
+                onClick={isEditing ? startEdit : undefined}
+              >
+                {content?.description || 'Discover our most enrolled courses across various disciplines, designed to help you achieve your learning goals.'}
+              </p>
+            </div>
 
         {/* Course Categories */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -88,13 +99,15 @@ export default function CoursesSection() {
           ))}
         </div>
         
-        {/* View All Courses Button */}
-        <div className="text-center mt-12">
-          <button className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-            View All Courses
-          </button>
-        </div>
-      </div>
-    </section>
+            {/* View All Courses Button */}
+            <div className="text-center mt-12">
+              <button className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                View All Courses
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+    </AdminEditableContent>
   );
 }

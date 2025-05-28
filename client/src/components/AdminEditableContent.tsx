@@ -26,7 +26,7 @@ interface PageContent {
 }
 
 interface AdminEditableContentProps {
-  section: 'home' | 'about' | 'contact' | 'features' | 'testimonials';
+  section: 'home' | 'about' | 'contact' | 'features' | 'testimonials' | 'courses';
   children: (content: any, isEditing: boolean, startEdit: () => void) => React.ReactNode;
 }
 
