@@ -14,7 +14,7 @@ export default function HeroSection({ onOpenRegistration }: HeroSectionProps) {
 
   return (
     <AdminEditableContent section="home">
-      {(content, isEditing, startEdit) => (
+      {(content, isEditing, startEdit, editableText, editableImage) => (
         <section id="home" className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center pt-20 relative overflow-hidden">
           {/* Background Decorative Elements */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-l from-primary/10 to-secondary/10 rounded-full -translate-y-48 translate-x-48"></div>

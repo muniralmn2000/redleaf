@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { Edit3, Save, Upload, X, Image as ImageIcon } from "lucide-react";
 
 interface PageContent {
   home: {
@@ -27,324 +23,210 @@ interface PageContent {
 
 interface AdminEditableContentProps {
   section: 'home' | 'about' | 'contact' | 'features' | 'testimonials' | 'courses';
-  children: (content: any, isEditing: boolean, startEdit: () => void) => React.ReactNode;
+  children: (content: any, isEditing: boolean, startEdit: () => void, editableText: any, editableImage: any) => React.ReactNode;
 }
 
 export default function AdminEditableContent({ section, children }: AdminEditableContentProps) {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editContent, setEditContent] = useState({ title: '', description: '', image: '' });
-  const [uploading, setUploading] = useState(false);
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+  const [content, setContent] = useState<any>({});
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Check admin status
+  // Check admin status on mount
   useEffect(() => {
-    const adminAuth = localStorage.getItem('adminAuthenticated');
-    setIsAdmin(adminAuth === 'true');
+    const adminStatus = localStorage.getItem('isAdmin');
+    setIsAdmin(adminStatus === 'true');
   }, []);
 
-  // Fetch page content
-  const { data: pageContent } = useQuery({
+  // Listen for admin login events
+  useEffect(() => {
+    const handleAdminLogin = () => {
+      setIsAdmin(true);
+    };
+
+    const handleAdminLogout = () => {
+      setIsAdmin(false);
+      setEditingField(null);
+    };
+
+    window.addEventListener('adminLogin', handleAdminLogin);
+    window.addEventListener('adminLogout', handleAdminLogout);
+
+    return () => {
+      window.removeEventListener('adminLogin', handleAdminLogin);
+      window.removeEventListener('adminLogout', handleAdminLogout);
+    };
+  }, []);
+
+  // Fetch content
+  const { data: pageContent, refetch } = useQuery({
     queryKey: ['/api/admin/page-content'],
     enabled: isAdmin,
   });
 
-  // Update content mutation
-  const updateContentMutation = useMutation({
-    mutationFn: async ({ page, title, description, image }: { page: string; title?: string; description?: string; image?: string }) => {
-      const response = await fetch('/api/admin/page-content', {
-        method: 'PUT',
-        body: JSON.stringify({ page, title, description, image }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!response.ok) throw new Error('Update failed');
-      return response.json();
+  useEffect(() => {
+    if (pageContent && pageContent[section]) {
+      setContent(pageContent[section]);
+    }
+  }, [pageContent, section]);
+
+  const updateMutation = useMutation({
+    mutationFn: async (formData: FormData) => {
+      return await apiRequest("PUT", "/api/admin/page-content", formData);
     },
     onSuccess: () => {
+      toast({
+        title: "Content updated successfully!",
+        description: "Changes have been saved.",
+      });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/page-content'] });
-      setIsEditing(false);
-      toast({
-        title: "Content Updated!",
-        description: "Changes have been saved and are now live on your website.",
-      });
+      setEditingField(null);
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
-        title: "Update Failed",
-        description: "Failed to save changes. Please try again.",
+        title: "Update failed",
+        description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  // Image upload mutation
-  const uploadImageMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const response = await fetch('/api/admin/upload-image', {
-        method: 'POST',
-        body: formData
-      });
-      if (!response.ok) throw new Error('Upload failed');
-      return response.json();
-    },
-    onSuccess: (data: any) => {
-      setEditContent(prev => ({ ...prev, image: data.imageUrl }));
-      setUploading(false);
-      toast({
-        title: "Image Uploaded!",
-        description: "New image has been uploaded successfully.",
-      });
-    },
-    onError: () => {
-      setUploading(false);
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload image. Please try again.",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const startEdit = () => {
-    if (pageContent && pageContent[section]) {
-      setEditContent(pageContent[section]);
-      setIsEditing(true);
-    }
-  };
-
-  const saveChanges = () => {
-    updateContentMutation.mutate({
-      page: section,
-      title: editContent.title,
-      description: editContent.description,
-      image: editContent.image
-    });
-  };
-
-  const cancelEdit = () => {
-    setIsEditing(false);
-    setEditContent({ title: '', description: '', image: '' });
-  };
-
-  const handleImageUpload = (file: File) => {
+  const handleImageUpload = (file: File, field: string = 'image') => {
     const formData = new FormData();
+    formData.append('section', section);
+    formData.append('field', field);
     formData.append('image', file);
-    formData.append('page', section);
-    setUploading(true);
-    uploadImageMutation.mutate(formData);
+    updateMutation.mutate(formData);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('adminAuthenticated');
-    localStorage.removeItem('adminEmail');
-    setIsAdmin(false);
-    toast({
-      title: "Admin Logout",
-      description: "You've been logged out of admin mode.",
-    });
-    window.location.reload();
+  const saveContent = (field: string, value: string) => {
+    const formData = new FormData();
+    formData.append('section', section);
+    formData.append('field', field);
+    formData.append('value', value);
+    updateMutation.mutate(formData);
   };
 
-  // Get current content or default
-  const getDefaultContent = (section: string) => {
-    switch(section) {
-      case 'home':
-        return {
-          title: 'Transform Your Learning Journey',
-          description: 'Join thousands of students and educators in our modern learning platform.',
-          image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        };
-      case 'about':
-        return {
-          title: 'About EduSphere',
-          description: 'Founded in 2020, EduSphere has been at the forefront of digital education.',
-          image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        };
-      case 'contact':
-        return {
-          title: 'Get In Touch',
-          description: 'Have questions about our courses or need assistance?',
-          image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        };
-      case 'features':
-        return {
-          title: 'Why Choose EduSphere?',
-          description: 'Discover the features that make our platform the preferred choice for modern learners.',
-          image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        };
-      case 'testimonials':
-        return {
-          title: 'What Our Students Say',
-          description: 'Hear from thousands of students who have transformed their careers through our platform.',
-          image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        };
-      default:
-        return {
-          title: 'Editable Content',
-          description: 'This content can be edited by admin.',
-          image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600'
-        };
+  const handleFieldEdit = (field: string, currentValue: string) => {
+    setEditingField(field);
+    setEditValue(currentValue);
+  };
+
+  const handleSaveField = () => {
+    if (editingField) {
+      saveContent(editingField, editValue);
     }
   };
 
-  const currentContent = pageContent && pageContent[section] ? pageContent[section] : getDefaultContent(section);
+  const handleCancelEdit = () => {
+    setEditingField(null);
+    setEditValue('');
+  };
 
-  if (!isAdmin) {
-    return <>{children(currentContent, false, () => {})}</>;
-  }
+  // Create editable text function for direct click editing
+  const createEditableText = (field: string, defaultValue: string, className: string = '') => {
+    const value = content?.[field] || defaultValue;
+    
+    if (!isAdmin) {
+      return value;
+    }
+
+    return (
+      <span 
+        className={`${className} cursor-pointer hover:bg-yellow-100 hover:shadow-lg hover:scale-105 transition-all duration-300 relative group border-2 border-transparent hover:border-yellow-300 rounded-md px-1`}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleFieldEdit(field, value);
+        }}
+        title="Click to edit this text"
+      >
+        {value}
+        <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          ✏️ Click to edit
+        </span>
+      </span>
+    );
+  };
+
+  // Create editable image function for direct click editing
+  const createEditableImage = (field: string, defaultSrc: string, className: string = '', alt: string = '') => {
+    const src = content?.[field] || defaultSrc;
+    
+    if (!isAdmin) {
+      return <img src={src} alt={alt} className={className} />;
+    }
+
+    return (
+      <div className="relative group">
+        <img 
+          src={src} 
+          alt={alt} 
+          className={`${className} cursor-pointer hover:opacity-70 transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 border-transparent hover:border-yellow-300 rounded-lg`} 
+        />
+        <div 
+          className="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer rounded-lg"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (event) => {
+              const file = (event.target as HTMLInputElement).files?.[0];
+              if (file) {
+                handleImageUpload(file, field);
+              }
+            };
+            input.click();
+          }}
+        >
+          <div className="text-center text-white">
+            <div className="text-2xl mb-2">📷</div>
+            <div className="text-sm font-semibold">Click to change image</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="relative">
-      {/* Admin Controls Bar */}
-      {isAdmin && !isEditing && (
-        <div className="fixed top-4 right-4 z-50 flex items-center space-x-2">
-          <Button
-            onClick={startEdit}
-            size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
-          >
-            <Edit3 className="w-4 h-4 mr-2" />
-            Edit {section.charAt(0).toUpperCase() + section.slice(1)}
-          </Button>
-          <Button
-            onClick={handleLogout}
-            size="sm"
-            variant="outline"
-            className="shadow-lg"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Exit Admin
-          </Button>
+    <>
+      {children(content || {}, isAdmin, () => {}, createEditableText, createEditableImage)}
+      
+      {editingField && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-xl max-w-lg w-full mx-4 shadow-2xl">
+            <h3 className="text-xl font-bold mb-4 text-gray-800">✏️ Edit Content</h3>
+            <textarea
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              className="w-full p-4 border-2 border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300"
+              rows={6}
+              autoFocus
+              placeholder="Enter your content here..."
+            />
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSaveField}
+                disabled={updateMutation.isPending}
+                className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold"
+              >
+                {updateMutation.isPending ? '💾 Saving...' : '💾 Save Changes'}
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="flex-1 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 font-semibold"
+              >
+                ❌ Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
-      {/* Edit Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold">Edit {section.charAt(0).toUpperCase() + section.slice(1)} Content</h2>
-                <Button
-                  onClick={cancelEdit}
-                  variant="ghost"
-                  size="sm"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="space-y-6">
-                {/* Title Input */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Title</label>
-                  <Input
-                    value={editContent.title}
-                    onChange={(e) => setEditContent(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Enter title"
-                    className="text-lg"
-                  />
-                </div>
-
-                {/* Description Input */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Description</label>
-                  <Textarea
-                    value={editContent.description}
-                    onChange={(e) => setEditContent(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter description"
-                    rows={4}
-                  />
-                </div>
-
-                {/* Image Upload */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Image</label>
-                  {editContent.image && (
-                    <div className="mb-4">
-                      <img 
-                        src={editContent.image} 
-                        alt="Current" 
-                        className="w-full h-48 object-cover rounded-lg border"
-                      />
-                    </div>
-                  )}
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleImageUpload(file);
-                      }}
-                      disabled={uploading}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      disabled={uploading}
-                    >
-                      {uploading ? (
-                        "Uploading..."
-                      ) : (
-                        <>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Upload
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Preview */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Preview</label>
-                  <div className="p-4 border rounded-lg bg-gray-50">
-                    {editContent.image && (
-                      <img 
-                        src={editContent.image} 
-                        alt="Preview" 
-                        className="w-full h-32 object-cover rounded mb-3"
-                      />
-                    )}
-                    <h3 className="text-xl font-bold mb-2">{editContent.title || 'Title will appear here'}</h3>
-                    <p className="text-gray-600">{editContent.description || 'Description will appear here'}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 pt-4 border-t">
-                  <Button
-                    onClick={cancelEdit}
-                    variant="outline"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={saveChanges}
-                    disabled={updateContentMutation.isPending}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    {updateContentMutation.isPending ? (
-                      "Saving..."
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Content Display */}
-      {children(isEditing ? editContent : currentContent, isEditing, startEdit)}
-    </div>
+    </>
   );
 }
