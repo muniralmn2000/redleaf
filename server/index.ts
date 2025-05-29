@@ -2,9 +2,7 @@ import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
-import { fileURLToPath } from "url";
 
 const app = express();
 
@@ -19,9 +17,6 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Serve static files from client/public
 app.use(express.static(path.join(__dirname, "../client/public")));
@@ -49,7 +44,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      console.log(logLine);
     }
   });
 
@@ -67,15 +62,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
   // Use process.env.PORT for Render, fallback to 3000 for local
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   server.listen({
@@ -83,7 +69,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     host: "0.0.0.0",
     ...(process.platform !== "win32" ? { reusePort: true } : {})
   }, () => {
-    log(`serving on port ${port}`);
+    console.log(`serving on port ${port}`);
   });
 })();
 
