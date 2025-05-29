@@ -1,4 +1,4 @@
-import { users, content, courses, contactMessages, type User, type InsertUser, type Content, type InsertContent, type Course, type InsertCourse, type ContactMessage, type InsertContactMessage } from "@shared/schema";
+import { users, content, courses, contactMessages, type User, type InsertUser, type Content, type InsertContent, type Course, type InsertCourse, type ContactMessage, type InsertContactMessage } from "../../shared/schema";
 import prisma from './prismaClient';
 import type { User as PrismaUser, Course as PrismaCourse, Content as PrismaContent, ContactMessage as PrismaContactMessage } from '../generated/prisma';
 

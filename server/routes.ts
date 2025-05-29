@@ -6,7 +6,7 @@ import {
   insertContactMessageSchema,
   insertContentSchema,
   insertCourseSchema,
-} from "@shared/schema";
+} from "../../shared/schema";
 import multer, { StorageEngine } from "multer";
 import path from "path";
 import fs from "fs";

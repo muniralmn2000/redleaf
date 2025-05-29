@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn server/index.ts",
     "build": "tsc && prisma generate",
-    "postbuild": "cpx \"generated/**\" dist/generated",
+    "postbuild": "cpx \"generated/**\" dist/generated && tsc-alias",
     "start": "node dist/server/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push"
@@ -112,6 +112,7 @@
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.19.1",
     "typescript": "^5.8.3",
     "vite": "^5.4.14"
