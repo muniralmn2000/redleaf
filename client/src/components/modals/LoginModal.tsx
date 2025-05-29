@@ -20,30 +20,46 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegistration }: 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
       // Check if admin credentials
-      if (data.email === 'munir@gmail.com' && data.password === '12341234') {
+      if (
+        (data.email === 'munir@gmail.com' && data.password === '12341234') ||
+        (data.email === 'jusinadmin@gmail.com' && data.password === '12341234')
+      ) {
         // Admin login - set local storage and dispatch event
         localStorage.setItem('isAdmin', 'true');
         localStorage.setItem('adminEmail', data.email);
-        
-        // Dispatch custom event for admin login
+        localStorage.removeItem('userEmail');
+        localStorage.setItem('isLoggedIn', 'true');
+        window.dispatchEvent(new CustomEvent('login'));
         window.dispatchEvent(new CustomEvent('adminLogin'));
-        
         return { success: true, isAdmin: true };
       } else {
         // Regular user login
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('adminEmail');
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userEmail', data.email);
+        window.dispatchEvent(new CustomEvent('login'));
+        window.dispatchEvent(new CustomEvent('adminLogout'));
         return await apiRequest("POST", "/api/login", {
           email: data.email,
           password: data.password
         });
       }
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (result.isAdmin) {
         toast({
           title: "Admin Access Granted!",
           description: "You can now edit content directly on the website.",
         });
       } else {
+        // Fetch user full name after login
+        try {
+          const res = await apiRequest("GET", `/api/user?email=${encodeURIComponent(formData.email)}`);
+          if (res && res.fullName) {
+            localStorage.setItem('userFullName', res.fullName);
+          }
+        } catch (e) {}
         toast({
           title: "Login successful!",
           description: `Welcome back!`,
@@ -153,12 +169,6 @@ export default function LoginModal({ isOpen, onClose, onSwitchToRegistration }: 
               Sign up
             </button>
           </p>
-        </div>
-
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800 font-medium">Admin Login:</p>
-          <p className="text-sm text-blue-600">Email: munir@gmail.com</p>
-          <p className="text-sm text-blue-600">Password: 12341234</p>
         </div>
 
         <button

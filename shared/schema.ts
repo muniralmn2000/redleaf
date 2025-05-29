@@ -18,6 +18,7 @@ export const users = pgTable("users", {
   transferLetterPath: text("transfer_letter_path"),
   resumePath: text("resume_path"), // for teachers
   createdAt: timestamp("created_at").defaultNow(),
+  status: text("status").default("pending"), // 'pending', 'active', 'rejected'
 });
 
 export const content = pgTable("content", {
@@ -51,12 +52,15 @@ export const contactMessages = pgTable("contact_messages", {
   email: text("email").notNull(),
   subject: text("subject").notNull(),
   message: text("message").notNull(),
+  reply: text("reply"), // admin reply, nullable
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
+}).extend({
+  status: z.enum(["pending", "active", "rejected"]).default("pending"),
 });
 
 export const insertContentSchema = createInsertSchema(content).omit({

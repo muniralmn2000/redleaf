@@ -45,8 +45,8 @@ export default function RegistrationModal({ isOpen, onClose }: RegistrationModal
     onSuccess: async (response) => {
       if (response.ok) {
         toast({
-          title: "Registration successful!",
-          description: "Check your email for confirmation.",
+          title: "Thank you for registering!",
+          description: "We will contact you soon.",
         });
         onClose();
         resetForms();
@@ -74,8 +74,8 @@ export default function RegistrationModal({ isOpen, onClose }: RegistrationModal
     onSuccess: async (response) => {
       if (response.ok) {
         toast({
-          title: "Application submitted!",
-          description: "We will review your application and contact you soon.",
+          title: "Thank you for registering!",
+          description: "We will contact you soon.",
         });
         onClose();
         resetForms();

@@ -1,5 +1,7 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+const API_BASE_URL = import.meta.env.REACT_APP_API_BASE_URL || '';
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -11,16 +13,33 @@ export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
-): Promise<Response> {
-  const res = await fetch(url, {
+): Promise<any> {
+  let options: RequestInit = {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
-  });
+  };
 
-  await throwIfResNotOk(res);
-  return res;
+  if (data instanceof FormData) {
+    options.body = data;
+    // Do NOT set Content-Type header for FormData
+  } else if (data) {
+    options.headers = { "Content-Type": "application/json" };
+    options.body = JSON.stringify(data);
+  }
+
+  // Prepend API_BASE_URL if url starts with '/'
+  const fullUrl = url.startsWith('/') ? API_BASE_URL + url : url;
+  const res = await fetch(fullUrl, options);
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    const json = await res.json();
+    if (!res.ok) throw new Error(`${res.status}: ${JSON.stringify(json)}`);
+    return json;
+  } else {
+    const text = await res.text();
+    if (!res.ok) throw new Error(`${res.status}: ${text}`);
+    return text;
+  }
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -29,7 +48,9 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const url = queryKey[0] as string;
+    const fullUrl = url.startsWith('/') ? API_BASE_URL + url : url;
+    const res = await fetch(fullUrl, {
       credentials: "include",
     });
 

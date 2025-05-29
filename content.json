@@ -1,17 +1,98 @@
 {
   "home": {
-    "title": "munir ahahahah",
-    "description": "",
-    "image": "/uploads/content/image-1748445215231-202284880.png"
+    "title": "welcome to redleaf",
+    "description": "Discover a new way to learn with our interactive courses, expert instructors, and supportive community. Start your journey to success today.",
+    "image": "/uploads/content/image-1748508353758-273904817.png"
   },
   "about": {
     "title": "About Usjjfdsojfsdjkfssdhjkbsdjfbdsjkfbsdjkfbsdkfbskdjfbsdkjfbsdjkfbskdjfbsdjkfbsdkjfbs",
     "description": "Who we are",
-    "image": "/uploads/content/image-1748446530346-862657508.png"
+    "image": "/uploads/content/image-1748446530346-862657508.png",
+    "value2Title": "iIntegrity",
+    "missionHeader": "Empowering Minds, Shaping Futures",
+    "galleryImage1": "/uploads/content/image-1748508485171-107921172.png",
+    "missionTitle": "hello",
+    "galleryCaption1Desc": "hello",
+    "galleryTitle": "Life at EduSphere",
+    "gallerySubtitle": "Experience our vibrant community through these glimpses of campus life and activities",
+    "galleryCaption2Title": "Team Projects",
+    "timelineTitle": "Our Journey",
+    "timelineSubtitle": "Milestones that shaped EduSphere into what it is today",
+    "teamImage2": "/uploads/content/image-1748547001186-251449737.png"
   },
   "contact": {
     "title": "hello",
-    "description": "helloss",
-    "image": "/uploads/content/image-1748446347561-215685216.png"
+    "description": "xddddddddddddhelloss",
+    "image": "/uploads/content/image-1748446347561-215685216.png",
+    "mainTitle": "xLet's Connect",
+    "phone": "+90(234) 567-890",
+    "phoneTitle": "Call Us"
+  },
+  "courses": {
+    "title": "Popular Courses",
+    "description": "Discover our most enrolled courses across various disciplines, designed to help you achieve your learning goals.",
+    "categoryAll": "All Courses",
+    "categoryTechnology": "Technology",
+    "categoryBusiness": "Business",
+    "categoryArts": "Arts",
+    "categoryScience": "Science",
+    "viewAllButton": "View All Courses",
+    "heroTitle": "Courses",
+    "heroSubtitle": "Explore our comprehensive range of educational programs designed to help you achieve your academic and career goals",
+    "features": [
+      {
+        "icon": "fa-chalkboard-teacher",
+        "title": "Expert Instructors",
+        "description": "Learn from industry professionals and experienced educators"
+      },
+      {
+        "icon": "fa-laptop",
+        "title": "Flexible Learning",
+        "description": "Study at your own pace with online and offline options"
+      },
+      {
+        "icon": "fa-users",
+        "title": "Community Support",
+        "description": "Join a community of learners and get peer support"
+      },
+      {
+        "icon": "fa-star",
+        "title": "New Feature",
+        "description": "Feature description..."
+      }
+    ]
+  },
+  "testimonials": {
+    "mainTitle": "What Our Students Say ",
+    "subtitle": "Hear from thousands of satisfied learners who have transformed their careers with EduSphere.",
+    "testimonial1Quote": "EduSphere transformed my career completely. The web development course was comprehensive and the instructors were incredibly supportive throughout my learning journey.",
+    "testimonial1Name": "Sarah Johnson",
+    "testimonial1Role": "Software Developer",
+    "testimonial1Image": "/uploads/content/image-1748465043759-160973450.png",
+    "testimonial2Quote": "The data science program exceeded my expectations. The hands-on projects and real-world applications helped me land my dream job in analytics.",
+    "testimonial2Name": "wMichael Chen",
+    "testimonial2Role": "Data Analyst",
+    "testimonial2Image": "/uploads/content/image-1748546095801-347595804.JPG",
+    "testimonial3Quote": "As a busy professional, the flexible schedule and high-quality content made it possible for me to upskill while working full-time. Highly recommended!",
+    "testimonial3Name": "Emily Rodriguez",
+    "testimonial3Role": "Marketing Manager",
+    "testimonial3Image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=60&h=60"
+  },
+  "footer": {
+    "brand": "EduSphere",
+    "brandSub": "EDUCATION",
+    "companyDesc": "Empowering learners worldwide with innovative online education and cutting-edge learning technologies.",
+    "quickLinksTitle": "Quick Links",
+    "supportTitle": "Support",
+    "contactTitle": "Contact Info",
+    "addressLine1": "123 Education Street",
+    "addressLine2": "Learning City, LC 12345",
+    "phone": "+1 (555) 123-4567",
+    "email": "support@edusphere.com",
+    "copyright": "© 2024 EduSphere Education Platform. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookie": "Cookie Policy",
+    "supportLink1": "1Help Center"
   }
 }

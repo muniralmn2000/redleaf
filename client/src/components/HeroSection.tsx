@@ -15,23 +15,23 @@ export default function HeroSection({ onOpenRegistration }: HeroSectionProps) {
   return (
     <AdminEditableContent section="home">
       {(content, isEditing, startEdit, editableText, editableImage) => (
-        <section id="home" className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center pt-20 relative overflow-hidden">
+        <section id="home" className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 py-32 md:py-40 relative pt-[140px] md:pt-[180px]">
           {/* Background Decorative Elements */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-l from-primary/10 to-secondary/10 rounded-full -translate-y-48 translate-x-48"></div>
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-r from-accent/10 to-primary/10 rounded-full translate-y-40 -translate-x-40"></div>
 
           <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
               {/* Content */}
               <div className="space-y-8">
-                <div className="space-y-6">
-                  <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      {editableText('title', 'EduSphere', 'inline-block')}
+                <div className="space-y-6 w-full overflow-visible bg-white bg-opacity-90 rounded-2xl shadow-xl p-12 md:p-20 mx-auto max-w-4xl min-h-[320px] md:min-h-[400px] flex flex-col items-center my-8">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight break-words whitespace-pre-line w-full overflow-visible text-center">
+                    <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent w-full overflow-visible">
+                      welcome
                     </span>
                   </h1>
-                  <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                    {editableText('description', 'Unlock your potential with our comprehensive online learning platform. Join thousands of students mastering new skills through expert-led courses, interactive projects, and personalized learning paths.', 'block')}
+                  <p className="text-xl text-gray-600 leading-relaxed break-words whitespace-pre-line w-full text-center">
+                    {editableText('description', 'This is a very long description to test the hero box. It should wrap, expand, and always be fully visible. No text should ever be hidden, clipped, or overflow out of the box. The design should remain beautiful and readable for any amount of content. Try adding even more text to see how it behaves!', 'block')}
                   </p>
                 </div>
 
@@ -72,12 +72,7 @@ export default function HeroSection({ onOpenRegistration }: HeroSectionProps) {
 
               {/* Hero Image */}
               <div className="relative">
-                <img 
-                  src={content.image} 
-                  alt="Students collaborating in modern learning environment" 
-                  className="rounded-3xl shadow-2xl w-full h-auto"
-                />
-                
+                {editableImage('image', 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600', 'rounded-3xl shadow-2xl w-full h-auto', 'Students collaborating in modern learning environment')}
                 {/* Floating Cards */}
                 <div className="absolute -top-4 -left-4 bg-white rounded-2xl p-4 shadow-lg">
                   <div className="flex items-center space-x-3">
@@ -85,7 +80,6 @@ export default function HeroSection({ onOpenRegistration }: HeroSectionProps) {
                     <span className="text-sm font-medium">Live Classes</span>
                   </div>
                 </div>
-                
                 <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl p-4 shadow-lg">
                   <div className="flex items-center space-x-3">
                     <i className="fas fa-certificate text-primary"></i>

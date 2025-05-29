@@ -1,20 +1,40 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
+import cors from "cors";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
+
+// CORS: Only allow requests from your custom domains
+app.use(cors({
+  origin: [
+    "https://redleafschool.com",
+    "https://www.redleafschool.com"
+  ],
+  credentials: true,
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.use((req, res, next) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve static files from client/public
+app.use(express.static(path.join(__dirname, "../client/public")));
+
+app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
+  res.json = function (bodyJson: any, ...args: any[]) {
     capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+    return originalResJson.call(res, bodyJson);
   };
 
   res.on("finish", () => {
@@ -56,15 +76,17 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // Use process.env.PORT for Render, fallback to 3000 for local
+  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
+    ...(process.platform !== "win32" ? { reusePort: true } : {})
   }, () => {
     log(`serving on port ${port}`);
   });
 })();
+
+// NOTE: For Prisma/SQLite, ensure your .env has DATABASE_URL set, e.g.:
+// DATABASE_URL="file:./prisma/dev.db"
+// And make sure dev.db is included in your deployment (not .gitignored if needed).

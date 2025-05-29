@@ -1,8 +1,7 @@
 import HeroSection from "@/components/HeroSection";
-import FeaturesSection from "@/components/FeaturesSection";
-import CoursesSection from "@/components/CoursesSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
-import ContactSection from "@/components/ContactSection";
+import Footer from "@/components/Footer";
+import CTASection from "@/components/CTASection";
 
 export default function Home() {
   const handleOpenRegistration = () => {
@@ -13,10 +12,8 @@ export default function Home() {
   return (
     <div>
       <HeroSection onOpenRegistration={handleOpenRegistration} />
-      <FeaturesSection />
-      <CoursesSection />
       <TestimonialsSection />
-      <ContactSection />
+      <CTASection onOpenRegistration={handleOpenRegistration} />
     </div>
   );
 }

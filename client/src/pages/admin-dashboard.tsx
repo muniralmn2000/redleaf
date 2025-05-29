@@ -1,581 +1,467 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Settings, 
-  Upload, 
-  Save, 
-  Eye, 
-  Home, 
-  Users, 
-  Phone, 
-  LogOut,
-  ImageIcon,
-  Edit3,
-  Globe,
-  BarChart3,
-  GraduationCap,
-  MessageSquare
-} from "lucide-react";
-
-interface PageContent {
-  home: {
-    title: string;
-    description: string;
-    image: string;
-  };
-  about: {
-    title: string;
-    description: string;
-    image: string;
-  };
-  contact: {
-    title: string;
-    description: string;
-    image: string;
-  };
-}
-
-interface AdminStats {
-  totalStudents: number;
-  totalTeachers: number;
-  activeCourses: number;
-  totalMessages: number;
-  recentRegistrations: Array<{
-    id: number;
-    name: string;
-    email: string;
-    role: string;
-    date: string;
-  }>;
-}
+import { useLocation } from "wouter";
 
 export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
-  const [editingContent, setEditingContent] = useState<{[key: string]: any}>({});
-  const [uploadingImages, setUploadingImages] = useState<{[key: string]: boolean}>({});
-  const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [, navigate] = useLocation();
   const queryClient = useQueryClient();
 
-  // Check authentication on mount
+  // Reply state for messages
+  const [replyingId, setReplyingId] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const replyInputRef = useRef<HTMLInputElement>(null);
+
+  const [showStudentsModal, setShowStudentsModal] = useState(false);
+  const [showTeachersModal, setShowTeachersModal] = useState(false);
+  const [showCoursesModal, setShowCoursesModal] = useState(false);
+  const [showMessagesModal, setShowMessagesModal] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+
   useEffect(() => {
-    const isAdminAuthenticated = localStorage.getItem('adminAuthenticated');
-    if (isAdminAuthenticated === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
+    const admin = localStorage.getItem("isAdmin") === "true";
+    setIsAdmin(admin);
+    if (!admin) navigate("/");
+  }, [navigate]);
 
-  // Admin login mutation
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: { email: string; password: string }) => {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        body: JSON.stringify(credentials),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!response.ok) throw new Error('Login failed');
-      return response.json();
+  // Stats
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["/api/admin/stats"],
+    queryFn: () => apiRequest("GET", "/api/admin/stats"),
+    enabled: isAdmin,
+  });
+  // Users
+  const { data: users = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/admin/users"],
+    queryFn: () => apiRequest("GET", "/api/admin/users"),
+    enabled: isAdmin,
+  });
+  // Courses
+  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+    queryKey: ["/api/courses"],
+    queryFn: () => apiRequest("GET", "/api/courses"),
+    enabled: isAdmin,
+  });
+  // Contact messages
+  const { data: messages = [], isLoading: messagesLoading } = useQuery({
+    queryKey: ["/api/admin/messages"],
+    queryFn: () => apiRequest("GET", "/api/admin/messages"),
+    enabled: isAdmin,
+  });
+  // Recent logins
+  const { data: logins = [], isLoading: loginsLoading } = useQuery({
+    queryKey: ["/api/admin/logins"],
+    queryFn: () => apiRequest("GET", "/api/admin/logins"),
+    enabled: isAdmin,
+  });
+  // Online users
+  const { data: onlineUsers = [], isLoading: onlineLoading } = useQuery({
+    queryKey: ["/api/admin/online-users"],
+    queryFn: () => apiRequest("GET", "/api/admin/online-users"),
+    enabled: isAdmin,
+  });
+  // Active users
+  const { data: activeUsers = [], isLoading: activeLoading } = useQuery({
+    queryKey: ["/api/admin/active-users"],
+    queryFn: () => apiRequest("GET", "/api/admin/active-users"),
+    enabled: isAdmin,
+  });
+
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const safeLogins = Array.isArray(logins) ? logins : [];
+  const safeOnlineUsers = Array.isArray(onlineUsers) ? onlineUsers : [];
+  const safeActiveUsers = Array.isArray(activeUsers) ? activeUsers : [];
+
+  // Pending users for admin approval
+  const pendingUsers = Array.isArray(users) ? users.filter((u: any) => u.status === "pending") : [];
+
+  // Quick action: Export users as CSV
+  const exportUsers = () => {
+    const csv = [
+      ["ID", "Name", "Email", "Role", "Student ID", "Created At"],
+      ...users.map((u: any) => [u.id, u.fullName, u.email, u.role, u.studentId || "", u.createdAt]),
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "users.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Quick action: Add course
+  const addCourseMutation = useMutation({
+    mutationFn: async () => {
+      const newCourse = {
+        title: "New Course",
+        description: "Course description...",
+        category: "Technology",
+        price: 0,
+        duration: "4 weeks",
+        studentCount: 0,
+        rating: "4.8",
+        imageUrl: "",
+        isActive: true,
+      };
+      return await apiRequest("POST", "/api/courses", newCourse);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/courses"] }),
+  });
+
+  // Quick action: Delete user (soft, just for demo)
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: number) => {
+      // Not implemented in backend, just filter in UI for now
+      return id;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] }),
+  });
+
+  // Quick action: Delete course
+  const deleteCourseMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest("DELETE", `/api/courses/${id}`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/courses"] }),
+  });
+
+  // Reply mutation for messages
+  const replyMutation = useMutation({
+    mutationFn: async ({ id, reply }: { id: number; reply: string }) => {
+      return await apiRequest("POST", `/api/admin/messages/${id}/reply`, { reply });
     },
     onSuccess: () => {
-      localStorage.setItem('adminAuthenticated', 'true');
-      setIsAuthenticated(true);
-      toast({
-        title: "Welcome!",
-        description: "Successfully logged in to admin dashboard",
-      });
+      setReplyingId(null);
+      setReplyText("");
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/messages"] });
     },
-    onError: () => {
-      toast({
-        title: "Login Failed",
-        description: "Invalid email or password",
-        variant: "destructive",
-      });
-    }
   });
 
-  // Fetch page content
-  const { data: pageContent, isLoading: loadingContent } = useQuery({
-    queryKey: ['/api/admin/page-content'],
-    enabled: isAuthenticated,
+  // Fetch students, teachers, courses, messages for modals
+  const { data: students = [], isLoading: studentsLoading } = useQuery({
+    queryKey: ["/api/admin/students"],
+    queryFn: () => apiRequest("GET", "/api/admin/students"),
+    enabled: showStudentsModal && isAdmin,
+  });
+  const { data: teachers = [], isLoading: teachersLoading } = useQuery({
+    queryKey: ["/api/admin/teachers"],
+    queryFn: () => apiRequest("GET", "/api/admin/teachers"),
+    enabled: showTeachersModal && isAdmin,
+  });
+  const { data: allCourses = [], isLoading: allCoursesLoading } = useQuery({
+    queryKey: ["/api/admin/all-courses"],
+    queryFn: () => apiRequest("GET", "/api/admin/all-courses"),
+    enabled: showCoursesModal && isAdmin,
+  });
+  const { data: allMessages = [], isLoading: allMessagesLoading } = useQuery({
+    queryKey: ["/api/admin/all-messages"],
+    queryFn: () => apiRequest("GET", "/api/admin/all-messages"),
+    enabled: showMessagesModal && isAdmin,
   });
 
-  // Fetch admin stats
-  const { data: adminStats, isLoading: loadingStats } = useQuery({
-    queryKey: ['/api/admin/stats'],
-    enabled: isAuthenticated,
-  });
-
-  // Update content mutation
-  const updateContentMutation = useMutation({
-    mutationFn: async ({ page, title, description, image }: { page: string; title?: string; description?: string; image?: string }) => {
-      const response = await fetch('/api/admin/page-content', {
-        method: 'PUT',
-        body: JSON.stringify({ page, title, description, image }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (!response.ok) throw new Error('Update failed');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/page-content'] });
-      toast({
-        title: "Content Updated",
-        description: "Page content has been successfully saved",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Update Failed",
-        description: "Failed to update page content",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Image upload mutation
-  const uploadImageMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      const response = await fetch('/api/admin/upload-image', {
-        method: 'POST',
-        body: formData
-      });
-      if (!response.ok) throw new Error('Upload failed');
-      return response.json();
-    },
-    onSuccess: (data: any, variables: FormData) => {
-      const page = variables.get('page') as string;
-      setEditingContent(prev => ({
-        ...prev,
-        [page]: { ...prev[page], image: data.imageUrl }
-      }));
-      setUploadingImages(prev => ({ ...prev, [page]: false }));
-      toast({
-        title: "Image Uploaded",
-        description: "Image has been successfully uploaded",
-      });
-    },
-    onError: (error, variables) => {
-      const page = (variables as any).get('page');
-      setUploadingImages(prev => ({ ...prev, [page]: false }));
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload image",
-        variant: "destructive",
-      });
-    }
-  });
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate(loginForm);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminAuthenticated');
-    setIsAuthenticated(false);
-    setLoginForm({ email: "", password: "" });
-    toast({
-      title: "Logged Out",
-      description: "Successfully logged out from admin dashboard",
-    });
-  };
-
-  const handleImageUpload = (page: string, file: File) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('page', page);
-    setUploadingImages(prev => ({ ...prev, [page]: true }));
-    uploadImageMutation.mutate(formData);
-  };
-
-  const handleContentSave = (page: string) => {
-    const content = editingContent[page];
-    if (content) {
-      updateContentMutation.mutate({
-        page,
-        title: content.title,
-        description: content.description,
-        image: content.image
-      });
-    }
-  };
-
-  const initializeEditingContent = (content: PageContent) => {
-    if (Object.keys(editingContent).length === 0) {
-      setEditingContent(content);
-    }
-  };
-
-  // Initialize editing content when page content is loaded
-  if (pageContent && Object.keys(editingContent).length === 0) {
-    initializeEditingContent(pageContent);
-  }
-
-  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mb-4">
-              <Settings className="w-8 h-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6 text-blue-700">Admin Dashboard</h1>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white shadow cursor-pointer" onClick={() => setShowStudentsModal(true)}>
+            <div className="text-lg font-semibold">Students</div>
+            <div className="text-3xl font-bold">{statsLoading ? "-" : stats?.totalStudents ?? 0}</div>
             </div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Admin Dashboard
-            </CardTitle>
-            <CardDescription>
-              Sign in to manage your education platform content
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@example.com"
-                  value={loginForm.email}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, email: e.target.value }))}
-                  required
-                />
+          <div className="bg-gradient-to-r from-secondary to-accent rounded-xl p-6 text-white shadow cursor-pointer" onClick={() => setShowTeachersModal(true)}>
+            <div className="text-lg font-semibold">Teachers</div>
+            <div className="text-3xl font-bold">{statsLoading ? "-" : stats?.totalTeachers ?? 0}</div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={loginForm.password}
-                  onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                  required
-                />
+          <div className="bg-gradient-to-r from-accent to-primary rounded-xl p-6 text-white shadow cursor-pointer" onClick={() => setShowCoursesModal(true)}>
+            <div className="text-lg font-semibold">Courses</div>
+            <div className="text-3xl font-bold">{statsLoading ? "-" : stats?.activeCourses ?? 0}</div>
               </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                disabled={loginMutation.isPending}
-              >
-                {loginMutation.isPending ? "Signing in..." : "Sign In"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+          <div className="bg-gradient-to-r from-green-400 to-blue-500 rounded-xl p-6 text-white shadow cursor-pointer" onClick={() => setShowMessagesModal(true)}>
+            <div className="text-lg font-semibold">Messages</div>
+            <div className="text-3xl font-bold">{statsLoading ? "-" : stats?.totalMessages ?? 0}</div>
       </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Settings className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Admin Dashboard
-                </h1>
-                <p className="text-sm text-gray-500">EduSphere Content Management</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open('/', '_blank')}
-                className="hidden sm:flex"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                View Site
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+        {/* Students Modal */}
+        {showStudentsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowStudentsModal(false)}>
+            <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold" onClick={() => setShowStudentsModal(false)}>&times;</button>
+              <h2 className="text-2xl font-bold mb-4">All Students</h2>
+              {studentsLoading ? <div>Loading...</div> : (
+                <ul className="max-h-[60vh] overflow-y-auto divide-y divide-gray-200">
+                  {students.length ? students.map((student: any) => (
+                    <li key={student.id} className="py-2">
+                      <div className="font-semibold">{student.fullName} ({student.email})</div>
+                      <div className="text-xs text-gray-500">Student ID: {student.studentId}</div>
+                    </li>
+                  )) : <li className="py-2 text-gray-500">No students found</li>}
+                </ul>
+              )}
             </div>
           </div>
+        )}
+        {/* Teachers Modal */}
+        {showTeachersModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowTeachersModal(false)}>
+            <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold" onClick={() => setShowTeachersModal(false)}>&times;</button>
+              <h2 className="text-2xl font-bold mb-4">All Teachers</h2>
+              {teachersLoading ? <div>Loading...</div> : (
+                <ul className="max-h-[60vh] overflow-y-auto divide-y divide-gray-200">
+                  {teachers.length ? teachers.map((teacher: any) => (
+                    <li key={teacher.id} className="py-2">
+                      <div className="font-semibold">{teacher.fullName} ({teacher.email})</div>
+                      {teacher.specialization && <div className="text-xs text-gray-500">Specialization: {teacher.specialization}</div>}
+                    </li>
+                  )) : <li className="py-2 text-gray-500">No teachers found</li>}
+                </ul>
+              )}
+            </div>
+          </div>
+        )}
+        {/* Courses Modal */}
+        {showCoursesModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowCoursesModal(false)}>
+            <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold" onClick={() => setShowCoursesModal(false)}>&times;</button>
+              <h2 className="text-2xl font-bold mb-4">All Courses</h2>
+              {allCoursesLoading ? <div>Loading...</div> : (
+                <ul className="max-h-[60vh] overflow-y-auto divide-y divide-gray-200">
+                  {allCourses.length ? allCourses.map((course: any) => (
+                    <li key={course.id} className="py-2">
+                      <div className="font-semibold">{course.title}</div>
+                      <div className="text-xs text-gray-500">Category: {course.category} | Students: {course.studentCount}</div>
+                    </li>
+                  )) : <li className="py-2 text-gray-500">No courses found</li>}
+                </ul>
+              )}
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-white/50 backdrop-blur-sm">
-            <TabsTrigger value="overview" className="flex items-center space-x-2">
-              <BarChart3 className="w-4 h-4" />
-              <span>Overview</span>
-            </TabsTrigger>
-            <TabsTrigger value="home" className="flex items-center space-x-2">
-              <Home className="w-4 h-4" />
-              <span>Home Page</span>
-            </TabsTrigger>
-            <TabsTrigger value="about" className="flex items-center space-x-2">
-              <Users className="w-4 h-4" />
-              <span>About Page</span>
-            </TabsTrigger>
-            <TabsTrigger value="contact" className="flex items-center space-x-2">
-              <Phone className="w-4 h-4" />
-              <span>Contact Page</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            {loadingStats ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-6">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-                    </CardContent>
-                  </Card>
-                ))}
+        )}
+        {/* Messages Modal (overrides old one) */}
+        {showMessagesModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={() => setShowMessagesModal(false)}>
+            <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative" onClick={e => e.stopPropagation()}>
+              <button className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold" onClick={() => setShowMessagesModal(false)}>&times;</button>
+              <h2 className="text-2xl font-bold mb-4">All Messages</h2>
+              {allMessagesLoading ? <div>Loading...</div> : (
+                <ul className="max-h-[60vh] overflow-y-auto divide-y divide-gray-200">
+                  {allMessages.length ? allMessages.map((msg: any) => (
+                    <li key={msg.id} className="py-2">
+                      <div className="font-semibold">{msg.firstName} {msg.lastName} ({msg.email})</div>
+                      <div className="text-xs text-gray-500">Subject: {msg.subject} | {new Date(msg.createdAt).toLocaleString()}</div>
+                      <div className="text-gray-700 mt-1">{msg.message}</div>
+                      {msg.reply && <div className="mt-2 p-2 bg-blue-50 border-l-4 border-blue-400 rounded text-blue-900">Reply: {msg.reply}</div>}
+                    </li>
+                  )) : <li className="py-2 text-gray-500">No messages found</li>}
+                </ul>
+              )}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-blue-100">Total Students</p>
-                        <p className="text-3xl font-bold">{adminStats?.totalStudents || 0}</p>
                       </div>
-                      <GraduationCap className="w-8 h-8 text-blue-200" />
+        )}
+        {/* Quick Actions */}
+        <div className="flex flex-wrap gap-4 mb-8">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700" onClick={() => addCourseMutation.mutate()}>+ Add Course</button>
+          <button className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700" onClick={exportUsers}>Export Users (CSV)</button>
                     </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-purple-100">Total Teachers</p>
-                        <p className="text-3xl font-bold">{adminStats?.totalTeachers || 0}</p>
-                      </div>
-                      <Users className="w-8 h-8 text-purple-200" />
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-green-100">Active Courses</p>
-                        <p className="text-3xl font-bold">{adminStats?.activeCourses || 0}</p>
-                      </div>
-                      <Globe className="w-8 h-8 text-green-200" />
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-orange-100">Messages</p>
-                        <p className="text-3xl font-bold">{adminStats?.totalMessages || 0}</p>
-                      </div>
-                      <MessageSquare className="w-8 h-8 text-orange-200" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+        {/* Recent Registrations & Logins */}
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-blue-700">Recent Registrations</h2>
+            {statsLoading ? <div>Loading...</div> : (
+              <ul className="divide-y divide-gray-200">
+                {stats?.recentRegistrations?.length ? stats.recentRegistrations.map((reg: any) => (
+                  <li key={reg.id} className="py-2 flex justify-between items-center">
+                    <span>{reg.name} ({reg.email})</span>
+                    <span className="text-xs text-gray-500">{reg.role} | {new Date(reg.date).toLocaleDateString()}</span>
+                  </li>
+                )) : <li className="py-2 text-gray-500">No recent registrations</li>}
+              </ul>
             )}
-
-            {/* Recent Activity */}
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="w-5 h-5" />
-                  <span>Recent Registrations</span>
-                </CardTitle>
-                <CardDescription>Latest users who joined the platform</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-64">
-                  <div className="space-y-3">
-                    {adminStats?.recentRegistrations?.map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                          <p className="font-medium">{user.name}</p>
-                          <p className="text-sm text-gray-500">{user.email}</p>
-                        </div>
-                        <div className="text-right">
-                          <Badge variant={user.role === 'student' ? 'default' : 'secondary'}>
-                            {user.role}
-                          </Badge>
-                          <p className="text-xs text-gray-500 mt-1">{user.date}</p>
+                      </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-blue-700">Recent Logins</h2>
+            {loginsLoading ? <div>Loading...</div> : (
+              <ul className="divide-y divide-gray-200">
+                {safeLogins.length ? safeLogins.map((login: any, i: number) => (
+                  <li key={i} className="py-2 flex justify-between items-center">
+                    <span>{login.email}</span>
+                    <span className="text-xs text-gray-500">{new Date(login.timestamp).toLocaleString()}</span>
+                  </li>
+                )) : <li className="py-2 text-gray-500">No recent logins</li>}
+              </ul>
+            )}
+                    </div>
+                      </div>
+        {/* Online/Active Users & Contact Messages */}
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-blue-700">Online Users</h2>
+            {onlineLoading ? <div>Loading...</div> : (
+              <ul className="divide-y divide-gray-200">
+                {safeOnlineUsers.length ? safeOnlineUsers.map((user: any) => (
+                  <li key={user.id} className="py-2 flex justify-between items-center">
+                    <span>{user.fullName} ({user.email})</span>
+                    <span className="text-xs text-gray-500">{user.role}</span>
+                  </li>
+                )) : <li className="py-2 text-gray-500">No users online</li>}
+              </ul>
+            )}
+                    </div>
+          <div className="bg-white rounded-xl shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-blue-700">Active Users (1 min)</h2>
+            {activeLoading ? <div>Loading...</div> : (
+              <ul className="divide-y divide-gray-200">
+                {safeActiveUsers.length ? safeActiveUsers.map((user: any) => (
+                  <li key={user.id} className="py-2 flex justify-between items-center">
+                    <span>{user.fullName} ({user.email})</span>
+                    <span className="text-xs text-gray-500">{user.role}</span>
+                  </li>
+                )) : <li className="py-2 text-gray-500">No active users</li>}
+              </ul>
+            )}
                         </div>
                       </div>
-                    ))}
+        {/* User Management Table */}
+        <div className="bg-white rounded-xl shadow p-6 mb-8 overflow-x-auto">
+          <h2 className="text-xl font-semibold mb-4 text-blue-700">User Management</h2>
+          {usersLoading ? <div>Loading...</div> : (
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left">ID</th>
+                  <th className="px-4 py-2 text-left">Name</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-left">Role</th>
+                  <th className="px-4 py-2 text-left">Student ID</th>
+                  <th className="px-4 py-2 text-left">Joined</th>
+                  <th className="px-4 py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length ? users.map((user: any) => (
+                  <tr key={user.id} className="border-b">
+                    <td className="px-4 py-2">{user.id}</td>
+                    <td className="px-4 py-2">{user.fullName}</td>
+                    <td className="px-4 py-2">{user.email}</td>
+                    <td className="px-4 py-2">{user.role}</td>
+                    <td className="px-4 py-2">{user.studentId || "-"}</td>
+                    <td className="px-4 py-2">{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-2">
+                      <button className="text-red-500 hover:underline" onClick={() => deleteUserMutation.mutate(user.id)}>Delete</button>
+                    </td>
+                  </tr>
+                )) : <tr><td colSpan={7} className="text-center py-4 text-gray-500">No users found</td></tr>}
+              </tbody>
+            </table>
+          )}
                   </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Page Content Tabs */}
-          {(['home', 'about', 'contact'] as const).map((page) => (
-            <TabsContent key={page} value={page} className="space-y-6">
-              {loadingContent ? (
-                <Card className="animate-pulse">
-                  <CardContent className="p-6">
-                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                    <div className="h-32 bg-gray-200 rounded mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center space-x-2 capitalize">
-                      {page === 'home' && <Home className="w-5 h-5" />}
-                      {page === 'about' && <Users className="w-5 h-5" />}
-                      {page === 'contact' && <Phone className="w-5 h-5" />}
-                      <span>{page} Page Content</span>
-                    </CardTitle>
-                    <CardDescription>
-                      Edit the content and images for the {page} page
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* Content Editor */}
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor={`${page}-title`}>Page Title</Label>
-                          <Input
-                            id={`${page}-title`}
-                            value={editingContent[page]?.title || ''}
-                            onChange={(e) => setEditingContent(prev => ({
-                              ...prev,
-                              [page]: { ...prev[page], title: e.target.value }
-                            }))}
-                            placeholder="Enter page title"
-                            className="bg-white"
-                          />
+        {/* Course Management Table */}
+        <div className="bg-white rounded-xl shadow p-6 mb-8 overflow-x-auto">
+          <h2 className="text-xl font-semibold mb-4 text-blue-700">Course Management</h2>
+          {coursesLoading ? <div>Loading...</div> : (
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="px-4 py-2 text-left">ID</th>
+                  <th className="px-4 py-2 text-left">Title</th>
+                  <th className="px-4 py-2 text-left">Category</th>
+                  <th className="px-4 py-2 text-left">Price</th>
+                  <th className="px-4 py-2 text-left">Duration</th>
+                  <th className="px-4 py-2 text-left">Students</th>
+                  <th className="px-4 py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courses.length ? courses.map((course: any) => (
+                  <tr key={course.id} className="border-b">
+                    <td className="px-4 py-2">{course.id}</td>
+                    <td className="px-4 py-2">{course.title}</td>
+                    <td className="px-4 py-2">{course.category}</td>
+                    <td className="px-4 py-2">${course.price}</td>
+                    <td className="px-4 py-2">{course.duration}</td>
+                    <td className="px-4 py-2">{course.studentCount}</td>
+                    <td className="px-4 py-2">
+                      <button className="text-red-500 hover:underline" onClick={() => deleteCourseMutation.mutate(course.id)}>Delete</button>
+                    </td>
+                  </tr>
+                )) : <tr><td colSpan={7} className="text-center py-4 text-gray-500">No courses found</td></tr>}
+              </tbody>
+            </table>
+          )}
                         </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor={`${page}-description`}>Page Description</Label>
-                          <Textarea
-                            id={`${page}-description`}
-                            value={editingContent[page]?.description || ''}
-                            onChange={(e) => setEditingContent(prev => ({
-                              ...prev,
-                              [page]: { ...prev[page], description: e.target.value }
-                            }))}
-                            placeholder="Enter page description"
-                            rows={4}
-                            className="bg-white"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Page Image</Label>
-                          <div className="flex items-center space-x-2">
-                            <Input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleImageUpload(page, file);
-                              }}
-                              className="bg-white"
-                              disabled={uploadingImages[page]}
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              disabled={uploadingImages[page]}
-                            >
-                              {uploadingImages[page] ? (
-                                "Uploading..."
-                              ) : (
-                                <>
-                                  <Upload className="w-4 h-4 mr-2" />
-                                  Upload
-                                </>
-                              )}
-                            </Button>
+        {/* Pending Registrations for Approval */}
+        <div className="bg-white rounded-xl shadow p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-blue-700">Pending Registrations</h2>
+          {pendingUsers.length ? (
+            <ul className="divide-y divide-gray-200">
+              {pendingUsers.map((user: any) => (
+                <li key={user.id} className="py-4 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+                  <div>
+                    <div className="font-semibold">{user.fullName} ({user.email})</div>
+                    <div className="text-xs text-gray-500">Role: {user.role}</div>
+                    {user.role === 'student' && (
+                      <>
+                        <div className="text-xs text-gray-500">Student ID: {user.studentId}</div>
+                        <div className="text-xs text-gray-500">Transfer: {user.isTransferStudent ? 'Yes' : 'No'}</div>
+                        {user.previousInstitution && <div className="text-xs text-gray-500">Previous Institution: {user.previousInstitution}</div>}
+                        {/* ID Document */}
+                        {user.idDocumentPath && (
+                          <div className="text-xs mt-1">
+                            <span className="font-semibold">ID Document: </span>
+                            {user.idDocumentPath.match(/\.(jpg|jpeg|png)$/i) ? (
+                              <img src={user.idDocumentPath.replace(/\\/g, '/').replace(/^.*uploads\//, '/uploads/')} alt="ID Document" className="inline-block h-16 border rounded" />
+                            ) : (
+                              <a href={user.idDocumentPath.replace(/\\/g, '/').replace(/^.*uploads\//, '/uploads/')} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Download</a>
+                            )}
                           </div>
+                        )}
+                        {/* Transfer Letter */}
+                        {user.transferLetterPath && (
+                          <div className="text-xs mt-1">
+                            <span className="font-semibold">Transfer Letter: </span>
+                            <a href={user.transferLetterPath.replace(/\\/g, '/').replace(/^.*uploads\//, '/uploads/')} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Download</a>
                         </div>
-
-                        <Separator />
-
-                        <Button
-                          onClick={() => handleContentSave(page)}
-                          disabled={updateContentMutation.isPending}
-                          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        >
-                          {updateContentMutation.isPending ? (
-                            "Saving..."
-                          ) : (
-                            <>
-                              <Save className="w-4 h-4 mr-2" />
-                              Save Changes
+                        )}
                             </>
                           )}
-                        </Button>
-                      </div>
-
-                      {/* Live Preview */}
-                      <div className="space-y-4">
-                        <div className="flex items-center space-x-2 text-sm font-medium text-gray-600">
-                          <Eye className="w-4 h-4" />
-                          <span>Live Preview</span>
-                        </div>
-                        
-                        <Card className="bg-white border-2 border-dashed border-gray-200">
-                          <CardContent className="p-6 space-y-4">
-                            {editingContent[page]?.image && (
-                              <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                                <img
-                                  src={editingContent[page].image}
-                                  alt={`${page} preview`}
-                                  className="w-full h-full object-cover"
-                                />
+                    {user.role === 'teacher' && (
+                      <>
+                        {user.specialization && <div className="text-xs text-gray-500">Specialization: {user.specialization}</div>}
+                        {user.experience && <div className="text-xs text-gray-500">Experience: {user.experience}</div>}
+                        {user.qualifications && <div className="text-xs text-gray-500">Qualifications: {user.qualifications}</div>}
+                        {/* Resume */}
+                        {user.resumePath && (
+                          <div className="text-xs mt-1">
+                            <span className="font-semibold">Resume: </span>
+                            <a href={user.resumePath.replace(/\\/g, '/').replace(/^.*uploads\//, '/uploads/')} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Download</a>
                               </div>
                             )}
-                            
-                            <div className="space-y-2">
-                              <h3 className="text-xl font-bold text-gray-900">
-                                {editingContent[page]?.title || `${page} Title`}
-                              </h3>
-                              <p className="text-gray-600 text-sm leading-relaxed">
-                                {editingContent[page]?.description || `${page} description will appear here...`}
-                              </p>
+                      </>
+                    )}
+                    <div className="text-xs text-gray-400">Registered: {new Date(user.createdAt).toLocaleString()}</div>
                             </div>
-                          </CardContent>
-                        </Card>
+                  <div className="flex gap-2 mt-2 md:mt-0">
+                    <button className="bg-green-600 text-white px-3 py-1 rounded" onClick={async () => {
+                      await apiRequest("POST", `/api/admin/users/${user.id}/accept`);
+                      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+                    }}>Accept</button>
+                    <button className="bg-red-600 text-white px-3 py-1 rounded" onClick={async () => {
+                      await apiRequest("POST", `/api/admin/users/${user.id}/reject`);
+                      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+                    }}>Reject</button>
                       </div>
+                </li>
+              ))}
+            </ul>
+          ) : <div className="text-gray-500">No pending registrations.</div>}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
+        <button onClick={() => navigate("/")} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Back to Site</button>
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ interface PageContent {
 }
 
 interface AdminEditableContentProps {
-  section: 'home' | 'about' | 'contact' | 'features' | 'testimonials' | 'courses';
+  section: 'home' | 'about' | 'contact' | 'features' | 'testimonials' | 'courses' | 'cta' | 'footer';
   children: (content: any, isEditing: boolean, startEdit: () => void, editableText: any, editableImage: any) => React.ReactNode;
 }
 
@@ -62,9 +62,9 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
   }, []);
 
   // Fetch content
-  const { data: pageContent, refetch } = useQuery({
+  const { data: pageContent, refetch } = useQuery<Record<string, any>>({
     queryKey: ['/api/admin/page-content'],
-    enabled: isAdmin,
+    refetchInterval: 2000, // Poll every 2 seconds
   });
 
   useEffect(() => {
@@ -74,8 +74,20 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
   }, [pageContent, section]);
 
   const updateMutation = useMutation({
-    mutationFn: async (formData: FormData) => {
-      return await apiRequest("PUT", "/api/admin/page-content", formData);
+    mutationFn: async (data: any) => {
+      // If data is FormData (for image), send as is. Otherwise, send as JSON.
+      if (data instanceof FormData) {
+        // Upload image, then update content.json with the new imageUrl
+        const uploadRes = await apiRequest("POST", "/api/admin/upload-image", data);
+        // Now update content.json with the new imageUrl
+        const page = data.get('page');
+        const field = data.get('field');
+        const imageUrl = uploadRes.imageUrl;
+        await apiRequest("PUT", "/api/admin/page-content", { page, [field]: imageUrl });
+        return uploadRes;
+      } else {
+        return await apiRequest("PUT", "/api/admin/page-content", data);
+      }
     },
     onSuccess: () => {
       toast({
@@ -96,18 +108,17 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
 
   const handleImageUpload = (file: File, field: string = 'image') => {
     const formData = new FormData();
-    formData.append('section', section);
+    formData.append('page', section);
     formData.append('field', field);
     formData.append('image', file);
     updateMutation.mutate(formData);
   };
 
   const saveContent = (field: string, value: string) => {
-    const formData = new FormData();
-    formData.append('section', section);
-    formData.append('field', field);
-    formData.append('value', value);
-    updateMutation.mutate(formData);
+    updateMutation.mutate({
+      page: section,
+      [field]: value,
+    });
   };
 
   const handleFieldEdit = (field: string, currentValue: string) => {
@@ -129,9 +140,8 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
   // Create editable text function for direct click editing
   const createEditableText = (field: string, defaultValue: string, className: string = '') => {
     const value = content?.[field] || defaultValue;
-    
     if (!isAdmin) {
-      return value;
+      return <span className={className}>{value}</span>;
     }
 
     return (
@@ -156,7 +166,6 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
   // Create editable image function for direct click editing
   const createEditableImage = (field: string, defaultSrc: string, className: string = '', alt: string = '') => {
     const src = content?.[field] || defaultSrc;
-    
     if (!isAdmin) {
       return <img src={src} alt={alt} className={className} />;
     }
@@ -201,8 +210,7 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
   return (
     <>
       {children(content || {}, isAdmin, () => {}, createEditableText, createEditableImage)}
-      
-      {editingField && (
+      {isAdmin && editingField && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-xl max-w-lg w-full mx-4 shadow-2xl">
             <h3 className="text-xl font-bold mb-4 text-gray-800">✏️ Edit Content</h3>
