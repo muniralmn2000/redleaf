@@ -1,9 +1,8 @@
-import React from "react";
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-// import type { Course } from "@shared/schema";
+import type { Course } from "@shared/schema";
 import AdminEditableContent from "./AdminEditableContent";
-import { apiRequest } from "../lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 
 const defaultCategories = [
   "All",
@@ -38,7 +37,7 @@ const defaultFeatures = [
 
 export default function CoursesSection() {
   const queryClient = useQueryClient();
-  const { data: courses = [], isLoading } = useQuery<any[]>({
+  const { data: courses = [], isLoading } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
     refetchInterval: 2000,
   });
@@ -229,9 +228,9 @@ export default function CoursesSection() {
                   <option value="price-high">Price: High to Low</option>
                 </select>
               </div>
-            </div>
+        </div>
 
-            {/* Courses Grid */}
+        {/* Courses Grid */}
             <div className="courses-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {paginatedCourses.map((course) => (
                 <AdminEditableContent key={course.id} section={`course-${course.id}` as any}>
@@ -259,7 +258,7 @@ export default function CoursesSection() {
                             </label>
                           : <img
                               src={course.imageUrl || "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250"}
-                              alt={course.title}
+                alt={course.title}
                               className="w-full h-full object-cover"
                             />
                         }
@@ -270,8 +269,8 @@ export default function CoursesSection() {
                                 queryClient.invalidateQueries({ queryKey: ["/api/courses"] });
                               }} />
                             : (course as any).level || 'Beginner'}
-                        </span>
-                      </div>
+                  </span>
+                  </div>
                       <div className="course-content p-6">
                         <h3 className="text-xl font-bold mb-2 text-[#2D3748]">
                           {isAdmin
@@ -296,7 +295,7 @@ export default function CoursesSection() {
                               }} />
                             : course.studentCount} Students
                           </span>
-                        </div>
+                </div>
                         <p className="course-desc text-gray-600 mb-4">
                           {isAdmin
                             ? <textarea defaultValue={course.description} className="bg-transparent border-b border-[#6C63FF] w-full" onBlur={async (e) => {
@@ -305,7 +304,7 @@ export default function CoursesSection() {
                               }} />
                             : course.description}
                         </p>
-                        <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4">
                           <div className="text-2xl font-bold text-[#6C63FF]">
                             {isAdmin
                               ? <input type="number" defaultValue={course.price} className="bg-transparent border-b border-[#6C63FF] w-20 font-bold" onBlur={async (e) => {
@@ -315,12 +314,12 @@ export default function CoursesSection() {
                               : <>${course.price}</>}
                           </div>
                           <button className="course-btn bg-gradient-to-r from-[#6C63FF] to-[#4A90E2] text-white px-6 py-2 rounded-full font-semibold hover:-translate-y-1 transition-all">Enroll Now</button>
-                        </div>
+                  </div>
                         {isAdmin && (
                           <button className="absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded-full text-xs" onClick={() => deleteCourseMutation.mutate(course.id)}>Delete</button>
                         )}
-                      </div>
-                    </div>
+                  </div>
+                </div>
                   )}
                 </AdminEditableContent>
               ))}
@@ -390,16 +389,16 @@ export default function CoursesSection() {
                           )}
                         </>
                       )}
-                    </div>
-                  ))}
+            </div>
+          ))}
                   {isAdmin && (
                     <div className="flex items-center justify-center h-48 bg-gray-100 rounded-xl border-2 border-dashed border-[#6C63FF] cursor-pointer hover:bg-gray-200 transition-all" onClick={() => addFeatureMutation.mutate()}>
                       <span className="text-[#6C63FF] text-xl font-bold">+ Add Feature</span>
-                    </div>
+        </div>
                   )}
-                </div>
-              </div>
-            </section>
+            </div>
+          </div>
+        </section>
           </>
         );
       }}

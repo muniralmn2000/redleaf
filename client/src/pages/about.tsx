@@ -1,5 +1,4 @@
-import React from "react";
-import AdminEditableContent from "../components/AdminEditableContent";
+import AdminEditableContent from "@/components/AdminEditableContent";
 
 interface AboutPageProps {
   onOpenLogin: () => void;

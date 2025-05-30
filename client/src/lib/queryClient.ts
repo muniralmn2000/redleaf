@@ -14,7 +14,7 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<any> {
-  let options: RequestInit = {
+  const options: RequestInit = {
     method,
     credentials: "include",
   };

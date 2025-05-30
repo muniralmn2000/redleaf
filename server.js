@@ -505,19 +505,6 @@ app.get('/api/content', (req, res) => {
     res.json(loadContent('home'));
 });
 
-// Serve static files from the React build output (client/dist)
-app.use(express.static(path.join(__dirname, 'client', 'dist')));
-
-// Add a /welcome route for a plain text welcome message
-app.get('/welcome', (req, res) => {
-  res.send('Welcome to EduSphere!');
-});
-
-// Catch-all route: serve index.html for all non-API, non-admin, non-upload routes (SPA fallback)
-app.get(/^\/(?!api|admin|uploads|public|pages|views|content_data|config|models|node_modules|favicon\.ico).*/, (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-});
-
 // Start the server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

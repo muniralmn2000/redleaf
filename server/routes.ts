@@ -6,7 +6,7 @@ import {
   insertContactMessageSchema,
   insertContentSchema,
   insertCourseSchema,
-} from "../shared/schema";
+} from "@shared/schema";
 import multer, { StorageEngine } from "multer";
 import path from "path";
 import fs from "fs";
@@ -186,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message:
               error instanceof Error ? error.message : "Registration failed",
           });
-      }
+    }
     },
   );
 
@@ -231,7 +231,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             message:
               error instanceof Error ? error.message : "Registration failed",
           });
-      }
+    }
     },
   );
 
@@ -375,7 +375,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ? error.message
                 : "Failed to update course",
           });
-      }
+    }
     },
   );
 

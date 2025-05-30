@@ -1,35 +1,28 @@
-import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
-import cors from "cors";
 import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "../tools/vite";
 import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
-
-// CORS: Only allow requests from your custom domains
-app.use(cors({
-  origin: [
-    "https://redleafschool.com",
-    "https://www.redleafschool.com"
-  ],
-  credentials: true,
-}));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Serve static files from client/public
 app.use(express.static(path.join(__dirname, "../client/public")));
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
-  res.json = function (bodyJson: any, ...args: any[]) {
+  res.json = function (bodyJson, ...args) {
     capturedJsonResponse = bodyJson;
-    return originalResJson.call(res, bodyJson);
+    return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
   res.on("finish", () => {
@@ -44,7 +37,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      console.log(logLine);
+      log(logLine);
     }
   });
 
@@ -62,17 +55,24 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     throw err;
   });
 
-  // Use process.env.PORT for Render, fallback to 3000 for local
-  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+
+  // ALWAYS serve the app on port 5000
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = 5001;
   server.listen({
     port,
     host: "0.0.0.0",
     ...(process.platform !== "win32" ? { reusePort: true } : {})
   }, () => {
-    console.log(`serving on port ${port}`);
+    log(`serving on port ${port}`);
   });
 })();
-
-// NOTE: For Prisma/SQLite, ensure your .env has DATABASE_URL set, e.g.:
-// DATABASE_URL="file:./prisma/dev.db"
-// And make sure dev.db is included in your deployment (not .gitignored if needed).

@@ -1,10 +1,8 @@
-import React from "react";
 import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "../lib/queryClient";
-import { useToast } from "../hooks/use-toast";
-import AdminEditableContent from "../components/AdminEditableContent";
-import CesiumGlobe from "../components/CesiumGlobe";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import AdminEditableContent from "@/components/AdminEditableContent";
 
 interface ContactPageProps {
   onOpenLogin: () => void;
@@ -188,7 +186,16 @@ export default function ContactPage({ onOpenLogin, onOpenRegistration, onOpenAdm
 
       {/* Map Section */}
       <div className="map-container w-full h-[400px]">
-        <CesiumGlobe />
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.215209060729!2d-73.9881176845938!3d40.74844047932787!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259a9b30eac9f%3A0x4a01c8dc9c8a3f0b!2sEmpire%20State%20Building!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          title="Our Location on Google Maps"
+          aria-label="Interactive map showing our location"
+        ></iframe>
       </div>
     </div>
   );

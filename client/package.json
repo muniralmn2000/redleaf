@@ -1,23 +1,19 @@
 {
-  "name": "redleafschool-client",
+  "name": "frontend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "cp -r dist ../server/public || xcopy /E /I /Y dist ..\\server\\public",
     "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "wouter": "^3.3.5"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "vite": "^5.4.14",
-    "@vitejs/plugin-react": "^4.3.2",
-    "tailwindcss": "^3.4.17",
-    "postcss": "^8.4.47",
-    "autoprefixer": "^10.4.20",
-    "@tailwindcss/typography": "^0.5.15"
+    "@vitejs/plugin-react": "^4.3.2"
   }
 } 
