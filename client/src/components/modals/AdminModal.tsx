@@ -68,26 +68,26 @@ export default function AdminModal({ isOpen, onClose }: AdminModalProps) {
   });
 
   // Fetch users
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: users = [] } = useQuery({
     queryKey: ["/api/admin/users"],
     enabled: isAuthenticated,
   });
 
   // Fetch content
-  const { data: content = [] } = useQuery<Content[]>({
+  const { data: content = [] } = useQuery({
     queryKey: ["/api/content"],
     enabled: isAuthenticated,
   });
 
   // Fetch courses
-  const { data: courses = [] } = useQuery<Course[]>({
+  const { data: courses = [] } = useQuery({
     queryKey: ["/api/courses"],
     enabled: isAuthenticated,
   });
 
   // Update content mutation
   const updateContentMutation = useMutation({
-    mutationFn: async ({ section, data }: { section: string; data: Partial<Content> }) => {
+    mutationFn: async ({ section, data }: { section: string; data: any }) => {
       return await apiRequest("PUT", `/api/content/${section}`, data);
     },
     onSuccess: () => {
@@ -265,7 +265,7 @@ export default function AdminModal({ isOpen, onClose }: AdminModalProps) {
                   <h3 className="text-xl font-semibold text-dark mb-4">Recent Registrations</h3>
                   <div className="space-y-4">
                     {stats?.recentRegistrations?.length ? (
-                      stats.recentRegistrations.map((registration) => (
+                      (stats.recentRegistrations as any[]).map((registration) => (
                         <div key={registration.id} className="flex items-center justify-between bg-white rounded-xl p-4">
                           <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center text-white font-semibold">
@@ -342,8 +342,8 @@ export default function AdminModal({ isOpen, onClose }: AdminModalProps) {
                     </div>
                     
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {courses.length ? (
-                        courses.map((course) => (
+                      {(courses as any[]).length ? (
+                        (courses as any[]).map((course) => (
                           <div key={course.id} className="bg-white rounded-xl p-4 border border-gray-200">
                             <div className="aspect-video bg-gray-200 rounded-lg mb-3 flex items-center justify-center">
                               <i className="fas fa-book text-gray-400 text-2xl"></i>
@@ -356,7 +356,7 @@ export default function AdminModal({ isOpen, onClose }: AdminModalProps) {
                                   <i className="fas fa-edit"></i>
                                 </button>
                                 <button 
-                                  onClick={() => handleDeleteCourse(course.id)}
+                                  onClick={() => handleDeleteCourse(course.id as number)}
                                   className="text-red-500 hover:text-red-600 transition-colors duration-300"
                                 >
                                   <i className="fas fa-trash"></i>
@@ -409,8 +409,8 @@ export default function AdminModal({ isOpen, onClose }: AdminModalProps) {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {users.length ? (
-                          users.map((user) => (
+                        {(users as any[]).length ? (
+                          (users as any[]).map((user) => (
                             <tr key={user.id}>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
