@@ -1,7 +1,8 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
 
 interface PageContent {
   home: {
@@ -83,7 +84,7 @@ export default function AdminEditableContent({ section, children }: AdminEditabl
         const page = data.get('page');
         const field = data.get('field');
         const imageUrl = uploadRes.imageUrl;
-        await apiRequest("PUT", "/api/admin/page-content", { page, [field]: imageUrl });
+        await apiRequest("PUT", "/api/admin/page-content", { page, [String(field)]: imageUrl });
         return uploadRes;
       } else {
         return await apiRequest("PUT", "/api/admin/page-content", data);

@@ -1,8 +1,9 @@
+import React from "react";
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Course } from "@shared/schema";
+// import type { Course } from "@shared/schema";
 import AdminEditableContent from "./AdminEditableContent";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "../lib/queryClient";
 
 const defaultCategories = [
   "All",
@@ -37,7 +38,7 @@ const defaultFeatures = [
 
 export default function CoursesSection() {
   const queryClient = useQueryClient();
-  const { data: courses = [], isLoading } = useQuery<Course[]>({
+  const { data: courses = [], isLoading } = useQuery<any[]>({
     queryKey: ["/api/courses"],
     refetchInterval: 2000,
   });

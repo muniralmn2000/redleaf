@@ -1,7 +1,8 @@
-import HeroSection from "@/components/HeroSection";
-import TestimonialsSection from "@/components/TestimonialsSection";
-import Footer from "@/components/Footer";
-import CTASection from "@/components/CTASection";
+import React from "react";
+import HeroSection from "../components/HeroSection";
+import TestimonialsSection from "../components/TestimonialsSection";
+import Footer from "../components/Footer";
+import CTASection from "../components/CTASection";
 
 export default function Home() {
   const handleOpenRegistration = () => {

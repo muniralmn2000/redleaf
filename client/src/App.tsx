@@ -1,25 +1,26 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "./components/ui/toaster";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 // Import components
-import Navbar from "@/components/navbar";
-import Footer from "@/components/Footer";
-import LoginModal from "@/components/modals/LoginModal";
-import RegistrationModal from "@/components/modals/RegistrationModal";
-import AdminModal from "@/components/modals/AdminModal";
-import CoursesSection from "@/components/CoursesSection";
+import Navbar from "./components/navbar";
+import Footer from "./components/Footer";
+import LoginModal from "./components/modals/LoginModal";
+import RegistrationModal from "./components/modals/RegistrationModal";
+import AdminModal from "./components/modals/AdminModal";
+import CoursesSection from "./components/CoursesSection";
 
 // Import pages
-import Home from "@/pages/home";
-import AboutPage from "@/pages/about";
-import ContactPage from "@/pages/contact";
-import NotFound from "@/pages/not-found";
-import AdminDashboard from "@/pages/admin-dashboard";
-import MyMessagesPage from "@/pages/my-messages";
+import Home from "./pages/home";
+import AboutPage from "./pages/about";
+import ContactPage from "./pages/contact";
+import NotFound from "./pages/not-found";
+import AdminDashboard from "./pages/admin-dashboard";
+import MyMessagesPage from "./pages/my-messages";
 
 function AdminBar() {
   const [isAdmin, setIsAdmin] = useState(false);
